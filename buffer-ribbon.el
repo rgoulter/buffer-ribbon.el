@@ -10,6 +10,9 @@
     (split-window bottom-window nil 'right)
     (balance-windows)))
 
+(setq buffer-ribbon-position 0)
+(setq buffer-ribbon-buffers '())
+
 ;; splitting horizontally ('right) first means that
 ;; other-window goes down, then returns to the top/right,
 ;; then down.
@@ -55,6 +58,93 @@
         (if is-vert-split
             (apply '-interleave children)
             (apply '-concat children))))))
+
+(defun buffer-ribbon/init ()
+  (interactive)
+  (buffer-ribbon/init-ribbon-from-windows)
+  (setq buffer-ribbon-position 0))
+
+(defun buffer-ribbon/refresh ()
+  (interactive)
+  ;; assumes that buffer-ribbon-position
+  (let* ((start buffer-ribbon-position)
+         (end   (+ 6 buffer-ribbon-position))
+         (new-buffers (-slice buffer-ribbon-buffers start end))
+         (wins (buffer-ribbon/list-of-windows-in-ribbon-order))
+         (win-buf-pairs (-zip-pair wins new-buffers)))
+    (mapcar
+      (lambda (pair)
+        (let ((win (car pair))
+              (buf (cdr pair)))
+          (set-window-buffer win buf)))
+      win-buf-pairs)))
+
+(defun buffer-ribbon/empty-buffer ()
+  "function which returns a buffer to assign
+as a 'default buffer' when moving the buffer-ribbon
+past its defined"
+  (get-buffer-create "*scratch*"))
+
+(defun buffer-ribbon/current-buffers-from-windows ()
+  (let ((wins (buffer-ribbon/list-of-windows-in-ribbon-order)))
+    (mapcar 'window-buffer wins)))
+
+(defun buffer-ribbon/init-ribbon-from-windows ()
+    (setq buffer-ribbon-buffers (buffer-ribbon/current-buffers-from-windows)))
+
+
+(setq buffer-ribbon-position 0)
+(setq buffer-ribbon-buffers '())
+
+(defun buffer-ribbon/update-ribbon-bufs (&rest _)
+  (when-let ((win (frame-selected-window)))
+    (unless (minibuffer-window-active-p win)
+      (let* ((old-ribbon buffer-ribbon-buffers)
+             (pos buffer-ribbon-position)
+             (new-head (-take pos old-ribbon))
+             (new-tail (-drop (+ pos 6) old-ribbon))
+             (current-bufs (buffer-ribbon/current-buffers-from-windows)))
+        (setq buffer-ribbon-buffers (append new-head current-bufs new-tail))))))
+
+;; (add-hook
+;;  'window-configuration-change-hook
+;;  'buffer-ribbon/update-ribbon-bufs)
+
+(defun buffer-ribbon/adjust-ribbon-position (col-delta)
+  "update buffer-ribbon-buffers by col-delta
+so that buffer-ribbon-position and buffer-ribbon-buffers
+can be applied in buffer-ribbon/refresh.
+
+At the moment this is pretty kludge-y,
+since it's just a proof of concept"
+  (setq buffer-ribbon-position
+        (+ buffer-ribbon-position (* 2 col-delta)))
+  ;; buffer-ribbon-pos < 0 means that
+  ;; buffers need to be prepended
+  (while (< buffer-ribbon-position 0)
+    (dotimes (i 2)  ;; 2x, because 2x rows in ribbon
+      (let ((buf (buffer-ribbon/empty-buffer)))
+        (setq buffer-ribbon-buffers (cons buf buffer-ribbon-buffers))))
+    (setq buffer-ribbon-position
+          (+ buffer-ribbon-position 2)))
+  ;; check if position + 6 > length of the list
+  ;; ...this feels inefficient; but for proof of concept
+  (while (>= (+ 6 buffer-ribbon-position)
+             (length buffer-ribbon-buffers))
+    (dotimes (i 2)  ;; 2x, because 2x rows in ribbon
+      (let ((buf (buffer-ribbon/empty-buffer)))
+        (setq buffer-ribbon-buffers
+              (append buffer-ribbon-buffers
+                      (list buf))))))
+  (buffer-ribbon/refresh))
+
+(defun buffer-ribbon/shift-left ()
+  (interactive)
+  (buffer-ribbon/adjust-ribbon-position +1))
+
+(defun buffer-ribbon/shift-right ()
+  (interactive)
+  (buffer-ribbon/adjust-ribbon-position -1))
 
 (provide 'buffer-ribbon)
 
