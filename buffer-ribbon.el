@@ -38,5 +38,23 @@
   (dotimes (i 12)
     (buffer-ribbon/--dummy-buffer-with-number i)))
 
+;; this is useful because (window-list) returns
+;; in an order I might not like
+;;
+;; this function returns in an order of columns I like
+;; for windows which are horizontal splits of vert splits
+;; (or vert splits of horizontal splits)
+(defun buffer-ribbon/list-of-windows-in-ribbon-order (&optional win)
+  (let ((win (or win (car (window-tree)))))
+    (if (windowp win)
+      (list win)
+      (let* ((is-vert-split (car win))
+             (children-wins (cddr win))
+             (children (mapcar 'buffer-ribbon/list-of-windows-in-ribbon-order
+                               children-wins)))
+        (if is-vert-split
+            (apply '-interleave children)
+            (apply '-concat children))))))
+
 (provide 'buffer-ribbon)
 
