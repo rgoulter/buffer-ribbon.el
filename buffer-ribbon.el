@@ -147,7 +147,7 @@ past its defined"
   (set-window-parameter window 'patch-grid-position patch-grid-position))
 
 (defun buffer-ribbon/patch-grid-window-p (window)
-  (window-parameter window 'is-patched-grid))
+  (window-parameter window 'is-patch-grid))
 
 (defun buffer-ribbon/patch-grid-window-position (window)
   (window-parameter window 'patch-grid-position))
@@ -330,6 +330,19 @@ grid with the buffers in the patch grid"
   (buffer-ribbon/adjust-ribbon-position (buffer-ribbon/current-buffer-ribbon)
                                         (buffer-ribbon/current-patch-grid)
                                         -1))
+
+(defun buffer-ribbon/zoom-selected-window ()
+  (interactive)
+  (when (buffer-ribbon/patch-grid-window-p (selected-window))
+    (set-frame-parameter nil 'buffer-ribbon-window-config (current-window-configuration))
+    (delete-other-windows)))
+
+(defun buffer-ribbon/unzoom ()
+  (interactive)
+  (let ((window-config (frame-parameter nil 'buffer-ribbon-window-config)))
+    (when window-config
+      (set-window-configuration window-config)
+      (set-frame-parameter nil 'buffer-ribbon-window-config nil))))
 
 ;; (add-hook
 ;;  'window-configuration-change-hook
