@@ -1,3 +1,7 @@
+;;;;
+;; window grid methods
+;;;;
+
 ;; splitting vertically ('below) first, then horizontally
 ;; means that other-window navigates "right" across
 ;; the top, then "right" across the bottom.
@@ -9,9 +13,6 @@
     (split-window bottom-window nil 'right)
     (split-window bottom-window nil 'right)
     (balance-windows)))
-
-(setq buffer-ribbon-position 0)
-(setq buffer-ribbon-buffers '())
 
 ;; splitting horizontally ('right) first means that
 ;; other-window goes down, then returns to the top/right,
@@ -27,6 +28,10 @@
     (split-window right-window nil 'below)
     (balance-windows)))
 
+;;;;
+;; "dummy" buffer methods
+;;;;
+
 (defun buffer-ribbon/--dummy-buffer-with-number (&optional num)
   (interactive)
   (let ((buf (generate-new-buffer "*ribbon-dummy*"))
@@ -40,6 +45,32 @@
   (interactive)
   (dotimes (i 12)
     (buffer-ribbon/--dummy-buffer-with-number i)))
+
+;;;;
+;; buffer ribbon methods
+;;;;
+
+(setq buffer-ribbon-position 0)
+(setq buffer-ribbon-buffers '())
+
+(defun buffer-ribbon/init ()
+  (interactive)
+  (buffer-ribbon/init-ribbon-from-windows)
+  (setq buffer-ribbon-position 0))
+
+(defun buffer-ribbon/init-ribbon-from-windows ()
+  (setq buffer-ribbon-buffers
+        (buffer-ribbon/current-buffers-from-windows)))
+
+(defun buffer-ribbon/empty-buffer ()
+  "function which returns a buffer to assign
+as a 'default buffer' when moving the buffer-ribbon
+past its defined"
+  (get-buffer-create "*scratch*"))
+
+;;;;
+;; patch grid methods
+;;;;
 
 ;; this is useful because (window-list) returns
 ;; in an order I might not like
@@ -59,13 +90,7 @@
             (apply '-interleave children)
             (apply '-concat children))))))
 
-(defun buffer-ribbon/init ()
-  (interactive)
-  (buffer-ribbon/init-ribbon-from-windows)
-  (setq buffer-ribbon-position 0))
-
-(defun buffer-ribbon/refresh ()
-  (interactive)
+(defun buffer-ribbon/push-buffer-ribbon-to-patch-grid ()
   ;; assumes that buffer-ribbon-position
   (let* ((start buffer-ribbon-position)
          (end   (+ 6 buffer-ribbon-position))
@@ -79,41 +104,29 @@
           (set-window-buffer win buf)))
       win-buf-pairs)))
 
-(defun buffer-ribbon/empty-buffer ()
-  "function which returns a buffer to assign
-as a 'default buffer' when moving the buffer-ribbon
-past its defined"
-  (get-buffer-create "*scratch*"))
-
 (defun buffer-ribbon/current-buffers-from-windows ()
   (let ((wins (buffer-ribbon/list-of-windows-in-ribbon-order)))
     (mapcar 'window-buffer wins)))
 
-(defun buffer-ribbon/init-ribbon-from-windows ()
-    (setq buffer-ribbon-buffers (buffer-ribbon/current-buffers-from-windows)))
-
-
-(setq buffer-ribbon-position 0)
-(setq buffer-ribbon-buffers '())
-
-(defun buffer-ribbon/update-ribbon-bufs (&rest _)
+(defun buffer-ribbon/update-ribbon-buffers (&rest _)
+  "replaces the part of the buffer ribbon which is visible on the patch
+grid with the buffers in the patch grid"
   (when-let ((win (frame-selected-window)))
     (unless (minibuffer-window-active-p win)
       (let* ((old-ribbon buffer-ribbon-buffers)
              (pos buffer-ribbon-position)
              (new-head (-take pos old-ribbon))
              (new-tail (-drop (+ pos 6) old-ribbon))
-             (current-bufs (buffer-ribbon/current-buffers-from-windows)))
-        (setq buffer-ribbon-buffers (append new-head current-bufs new-tail))))))
-
-;; (add-hook
-;;  'window-configuration-change-hook
-;;  'buffer-ribbon/update-ribbon-bufs)
+             (current-buffers (buffer-ribbon/current-buffers-from-windows)))
+        (setq buffer-ribbon-buffers
+              (append new-head
+                      current-buffers
+                      new-tail))))))
 
 (defun buffer-ribbon/adjust-ribbon-position (col-delta)
   "update buffer-ribbon-buffers by col-delta
 so that buffer-ribbon-position and buffer-ribbon-buffers
-can be applied in buffer-ribbon/refresh.
+can be applied in buffer-ribbon/push-buffer-ribbon-to-patch-grid.
 
 At the moment this is pretty kludge-y,
 since it's just a proof of concept"
@@ -136,7 +149,11 @@ since it's just a proof of concept"
         (setq buffer-ribbon-buffers
               (append buffer-ribbon-buffers
                       (list buf))))))
-  (buffer-ribbon/refresh))
+  (buffer-ribbon/push-buffer-ribbon-to-patch-grid))
+
+;;;;
+;; user-facing commands
+;;;;
 
 (defun buffer-ribbon/shift-left ()
   (interactive)
@@ -145,6 +162,10 @@ since it's just a proof of concept"
 (defun buffer-ribbon/shift-right ()
   (interactive)
   (buffer-ribbon/adjust-ribbon-position -1))
+
+;; (add-hook
+;;  'window-configuration-change-hook
+;;  'buffer-ribbon/update-ribbon-buffers)
 
 (provide 'buffer-ribbon)
 
