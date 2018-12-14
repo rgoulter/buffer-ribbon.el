@@ -50,9 +50,6 @@
 ;; buffer ribbon methods
 ;;;;
 
-(setq buffer-ribbon-position 0)
-(setq buffer-ribbon-buffers '())
-
 (defvar buffer-ribbon/global-ribbon nil
   "use buffer-ribbon/current-ribbon function instead of accessing this directly")
 
@@ -60,8 +57,7 @@
   (list 'buffer-ribbon
         0
         (or buffers
-            (mapcar (lambda (_) (buffer-ribbon/empty-buffer))
-                    (number-sequence 1 6)))))
+            (buffer-ribbon/empty-buffers 6))))
 
 (defun buffer-ribbon/buffer-ribbon-p (o)
   (and (listp o)
@@ -93,7 +89,7 @@
                     (list new-buffers)))
       (signal 'wrong-type-argument (list buffer-ribbon/buffer-ribbon-p ribbon))))
 
-(defun buffer-ribbon/current-ribbon ()
+(defun buffer-ribbon/current-buffer-ribbon ()
   buffer-ribbon/global-ribbon)
 
 (defun buffer-ribbon/init ()
@@ -110,6 +106,25 @@
 as a 'default buffer' when moving the buffer-ribbon
 past its defined"
   (get-buffer-create "*scratch*"))
+
+(defun buffer-ribbon/empty-buffers (n)
+  (mapcar (lambda (_) (buffer-ribbon/empty-buffer))
+          (number-sequence 1 n)))
+
+(defun buffer-ribbon/list-replace-at-offset (old-list offset new-content)
+  (let* ((len (length new-content))
+         (new-head (-take offset old-list))
+         (new-tail (-drop (+ offset len) old-list)))
+          (append new-head
+                  new-content
+                  new-tail)))
+
+(defun buffer-ribbon/buffer-ribbon-set-buffers-at-position (buffer-ribbon new-buffers)
+  "replaces the buffers at the ribbon's position with this"
+  (let* ((pos (buffer-ribbon/buffer-ribbon-position buffer-ribbon))
+         (old-buffers (buffer-ribbon/buffer-ribbon-buffers buffer-ribbon))
+         (new-buffers (buffer-ribbon/list-replace-at-offset old-buffers pos new-buffers)))
+    (buffer-ribbon/set-buffer-ribbon-buffers buffer-ribbon new-buffers)))
 
 ;;;;
 ;; patch grid methods
@@ -133,15 +148,15 @@ past its defined"
                           root-window
                           windows)))
     ;; assign parameters to each of the window
-    (-each-indexed (lambda (index window)
-                     (buffer-ribbon/set-patch-grid-window-parameters window index))
-                   windows)
+    (-each-indexed windows
+                   (lambda (index window)
+                     (buffer-ribbon/set-patch-grid-window-parameters window index)))
     patch-grid))
 
 (defun buffer-ribbon/patch-grid-p (o)
   (and (listp o)
        (eq 'patch-grid (car o))
-       (windowp (cadr o))
+       ;; (windowp (cadr o))
        (listp (caddr o))))
 
 (defun buffer-ribbon/patch-grid-root-window (patch-grid)
@@ -179,6 +194,11 @@ past its defined"
   "number of rows the patch grid has"
   2)
 
+(defun buffer-ribbon/patch-grid-count (&optional patch-grid)
+  "number of tiles the patch grid has"
+  (* (buffer-ribbon/patch-grid-width)
+     (buffer-ribbon/patch-grid-height)))
+
 ;; this is useful because (window-list) returns
 ;; in an order I might not like
 ;;
@@ -197,81 +217,113 @@ past its defined"
             (apply '-interleave children)
             (apply '-concat children))))))
 
-(defun buffer-ribbon/push-buffer-ribbon-to-patch-grid ()
-  (let* ((start buffer-ribbon-position)
-         (end   (+ 6 buffer-ribbon-position))
-         (new-buffers (-slice buffer-ribbon-buffers start end))
-         (wins (buffer-ribbon/list-of-windows-in-ribbon-order))
-         (win-buf-pairs (-zip-pair wins new-buffers)))
+(defun buffer-ribbon/buffer-ribbon-buffers-for-patch-grid (buffer-ribbon patch-grid)
+  "returns the buffers in the ribbon which are 'in view' of the patch grid"
+  (let* ((start (buffer-ribbon/buffer-ribbon-position buffer-ribbon))
+         (num-grid-tiles (buffer-ribbon/patch-grid-count patch-grid))
+         (end   (+ num-grid-tiles start))
+         (buffers (buffer-ribbon/buffer-ribbon-buffers buffer-ribbon)))
+    (-slice buffers start end)))
+
+(defun buffer-ribbon/push-buffer-ribbon-to-patch-grid (buffer-ribbon patch-grid)
+  (let* ((new-buffers (buffer-ribbon/buffer-ribbon-buffers-for-patch-grid
+                       buffer-ribbon
+                       patch-grid))
+         (windows (buffer-ribbon/patch-grid-windows patch-grid))
+         (window-buffer-pairs (-zip-pair windows new-buffers)))
     (mapcar
       (lambda (pair)
-        (let ((win (car pair))
-              (buf (cdr pair)))
-          (set-window-buffer win buf)))
-      win-buf-pairs)))
+        (let ((window (car pair))
+              (buffer (cdr pair)))
+          (set-window-buffer window buffer)))
+      window-buffer-pairs)))
 
 (defun buffer-ribbon/current-buffers-from-windows ()
   (let ((wins (buffer-ribbon/list-of-windows-in-ribbon-order)))
     (mapcar 'window-buffer wins)))
 
-(defun buffer-ribbon/update-ribbon-buffers (&rest _)
+(defun buffer-ribbon/update-buffer-ribbon-from-patch-grid (buffer-ribbon patch-grid)
   "replaces the part of the buffer ribbon which is visible on the patch
 grid with the buffers in the patch grid"
-  (when-let ((win (frame-selected-window)))
-    (unless (minibuffer-window-active-p win)
-      (let* ((old-ribbon buffer-ribbon-buffers)
-             (pos buffer-ribbon-position)
-             (new-head (-take pos old-ribbon))
-             (new-tail (-drop (+ pos 6) old-ribbon))
-             (current-buffers (buffer-ribbon/current-buffers-from-windows)))
-        (setq buffer-ribbon-buffers
-              (append new-head
-                      current-buffers
-                      new-tail))))))
+  (let* ((windows (buffer-ribbon/patch-grid-windows patch-grid))
+         (buffers (mapcar 'window-buffer windows)))
+    (buffer-ribbon/buffer-ribbon-set-buffers-at-position buffer-ribbon buffers)))
 
-;;; this method is pretty brutal.
-;;; can simplify it as: ribbon-num-cols;
-;;; and operating in terms of columns.
-;;; that ought to simplify this enough.
-(defun buffer-ribbon/adjust-ribbon-position (col-delta)
-  "update buffer-ribbon-buffers by col-delta
-so that buffer-ribbon-position and buffer-ribbon-buffers
-can be applied in buffer-ribbon/push-buffer-ribbon-to-patch-grid.
+(defun buffer-ribbon/buffer-ribbon-buffer-count (buffer-ribbon patch-grid)
+  (let ((buffers (buffer-ribbon/buffer-ribbon-buffers buffer-ribbon)))
+    (length buffers)))
 
-At the moment this is pretty kludge-y,
-since it's just a proof of concept"
-  (setq buffer-ribbon-position
-        (+ buffer-ribbon-position (* 2 col-delta)))
-  ;; buffer-ribbon-pos < 0 means that
-  ;; buffers need to be prepended
-  (while (< buffer-ribbon-position 0)
-    (dotimes (i 2)  ;; 2x, because 2x rows in ribbon
-      (let ((buf (buffer-ribbon/empty-buffer)))
-        (setq buffer-ribbon-buffers (cons buf buffer-ribbon-buffers))))
-    (setq buffer-ribbon-position
-          (+ buffer-ribbon-position 2)))
-  ;; check if position + 6 > length of the list
-  ;; ...this feels inefficient; but for proof of concept
-  (while (>= (+ 6 buffer-ribbon-position)
-             (length buffer-ribbon-buffers))
-    (dotimes (i 2)  ;; 2x, because 2x rows in ribbon
-      (let ((buf (buffer-ribbon/empty-buffer)))
-        (setq buffer-ribbon-buffers
-              (append buffer-ribbon-buffers
-                      (list buf))))))
-  (buffer-ribbon/push-buffer-ribbon-to-patch-grid))
+(defun buffer-ribbon/buffer-ribbon-width (buffer-ribbon patch-grid)
+  "column count for the buffer ribbon.
+
+This only makes sense in terms of which patch grid it's applied to."
+  (let ((buffers (buffer-ribbon/buffer-ribbon-buffers buffer-ribbon))
+        (column-height (buffer-ribbon/patch-grid-height patch-grid)))
+    (/ (length buffers) column-height)))
+
+(defun buffer-ribbon/buffer-ribbon-column (buffer-ribbon patch-grid)
+  "column index of the buffer ribbon.
+
+This only makes sense in terms of which patch grid it's applied to."
+  (let ((position (buffer-ribbon/buffer-ribbon-position buffer-ribbon))
+        (column-height (buffer-ribbon/patch-grid-height patch-grid)))
+    (/ position column-height)))
+
+(defun buffer-ribbon/buffer-ribbon-append-column (buffer-ribbon)
+  (let ((add-buffers (buffer-ribbon/empty-buffers 2))
+        (old-buffers (buffer-ribbon/buffer-ribbon-buffers buffer-ribbon)))
+    (buffer-ribbon/set-buffer-ribbon-buffers buffer-ribbon (append old-buffers add-buffers))))
+
+(defun buffer-ribbon/buffer-ribbon-prepend-column (buffer-ribbon)
+  (let ((add-buffers (buffer-ribbon/empty-buffers 2))
+        (old-buffers (buffer-ribbon/buffer-ribbon-buffers buffer-ribbon))
+        (old-position (buffer-ribbon/buffer-ribbon-position buffer-ribbon)))
+    (buffer-ribbon/set-buffer-ribbon-buffers buffer-ribbon (append add-buffers old-buffers))
+    (buffer-ribbon/set-buffer-ribbon-position buffer-ribbon (+ old-position 2))))
+
+(defun buffer-ribbon/adjust-ribbon-position (buffer-ribbon patch-grid column-delta)
+  (buffer-ribbon/update-buffer-ribbon-from-patch-grid buffer-ribbon patch-grid)
+  (let* ((ribbon-column (buffer-ribbon/buffer-ribbon-column buffer-ribbon patch-grid))
+         (ribbon-width (buffer-ribbon/buffer-ribbon-width buffer-ribbon patch-grid))
+         (new-column (+ ribbon-column column-delta))
+         (grid-width (buffer-ribbon/patch-grid-width patch-grid))
+         (num-columns-to-prepend (- 0 new-column))
+         (num-columns-to-append (- (+ new-column grid-width) ribbon-width)))
+    (dotimes (_ num-columns-to-prepend)
+      (buffer-ribbon/buffer-ribbon-prepend-column buffer-ribbon))
+    (dotimes (_ num-columns-to-append)
+      (buffer-ribbon/buffer-ribbon-append-column buffer-ribbon)))
+  (let ((old-position (buffer-ribbon/buffer-ribbon-position buffer-ribbon))
+        (delta-position (* 2 column-delta)))
+    (buffer-ribbon/set-buffer-ribbon-position buffer-ribbon (+ old-position delta-position)))
+  (buffer-ribbon/push-buffer-ribbon-to-patch-grid buffer-ribbon patch-grid))
+
 
 ;;;;
 ;; user-facing commands
 ;;;;
 
+(defun buffer-ribbon/init-from-current-windows ()
+  (interactive)
+  (let* ((root-win nil)  ;; I think this should be the "window-tree" root
+         (current-windows (buffer-ribbon/list-of-windows-in-ribbon-order))
+         (patch-grid (buffer-ribbon/make-patch-grid root-win current-windows))
+         (buffer-ribbon (buffer-ribbon/make-buffer-ribbon)))
+    (setq buffer-ribbon/global-ribbon buffer-ribbon)
+    (setq buffer-ribbon/global-patch-grid patch-grid)
+    (buffer-ribbon/update-buffer-ribbon-from-patch-grid buffer-ribbon patch-grid)))
+
 (defun buffer-ribbon/shift-left ()
   (interactive)
-  (buffer-ribbon/adjust-ribbon-position +1))
+  (buffer-ribbon/adjust-ribbon-position (buffer-ribbon/current-buffer-ribbon)
+                                        (buffer-ribbon/current-patch-grid)
+                                        +1))
 
 (defun buffer-ribbon/shift-right ()
   (interactive)
-  (buffer-ribbon/adjust-ribbon-position -1))
+  (buffer-ribbon/adjust-ribbon-position (buffer-ribbon/current-buffer-ribbon)
+                                        (buffer-ribbon/current-patch-grid)
+                                        -1))
 
 ;; (add-hook
 ;;  'window-configuration-change-hook
