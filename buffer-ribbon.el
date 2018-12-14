@@ -53,6 +53,49 @@
 (setq buffer-ribbon-position 0)
 (setq buffer-ribbon-buffers '())
 
+(defvar buffer-ribbon/global-ribbon nil
+  "use buffer-ribbon/current-ribbon function instead of accessing this directly")
+
+(defun buffer-ribbon/make-buffer-ribbon (&optional buffers)
+  (list 'buffer-ribbon
+        0
+        (or buffers
+            (mapcar (lambda (_) (buffer-ribbon/empty-buffer))
+                    (number-sequence 1 6)))))
+
+(defun buffer-ribbon/buffer-ribbon-p (o)
+  (and (listp o)
+       (eq 'buffer-ribbon (car o))
+       (integerp (cadr o))
+       (listp (caddr o))))
+
+(defun buffer-ribbon/buffer-ribbon-position (ribbon)
+  (if (buffer-ribbon/buffer-ribbon-p ribbon)
+      (cadr ribbon)
+      (signal 'wrong-type-argument (list buffer-ribbon/buffer-ribbon-p ribbon))))
+
+(defun buffer-ribbon/set-buffer-ribbon-position (ribbon new-position)
+  (if (buffer-ribbon/buffer-ribbon-p ribbon)
+      (setcdr ribbon
+              (cons new-position
+                    (caddr ribbon)))
+      (signal 'wrong-type-argument (list buffer-ribbon/buffer-ribbon-p ribbon))))
+
+(defun buffer-ribbon/buffer-ribbon-buffers (ribbon)
+  (if (buffer-ribbon/buffer-ribbon-p ribbon)
+      (caddr ribbon)
+      (signal 'wrong-type-argument (list buffer-ribbon/buffer-ribbon-p ribbon))))
+
+(defun buffer-ribbon/set-buffer-ribbon-buffers (ribbon new-buffers)
+  (if (buffer-ribbon/buffer-ribbon-p ribbon)
+      (setcdr ribbon
+              (cons (cadr ribbon)
+                    new-buffers))
+      (signal 'wrong-type-argument (list buffer-ribbon/buffer-ribbon-p ribbon))))
+
+(defun buffer-ribbon/current-ribbon ()
+  buffer-ribbon/global-ribbon)
+
 (defun buffer-ribbon/init ()
   (interactive)
   (buffer-ribbon/init-ribbon-from-windows)
