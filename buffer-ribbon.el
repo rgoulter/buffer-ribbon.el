@@ -78,7 +78,7 @@
   (if (buffer-ribbon/buffer-ribbon-p ribbon)
       (setcdr ribbon
               (cons new-position
-                    (caddr ribbon)))
+                    (list (caddr ribbon))))
       (signal 'wrong-type-argument (list buffer-ribbon/buffer-ribbon-p ribbon))))
 
 (defun buffer-ribbon/buffer-ribbon-buffers (ribbon)
@@ -90,7 +90,7 @@
   (if (buffer-ribbon/buffer-ribbon-p ribbon)
       (setcdr ribbon
               (cons (cadr ribbon)
-                    new-buffers))
+                    (list new-buffers)))
       (signal 'wrong-type-argument (list buffer-ribbon/buffer-ribbon-p ribbon))))
 
 (defun buffer-ribbon/current-ribbon ()
@@ -115,6 +115,70 @@ past its defined"
 ;; patch grid methods
 ;;;;
 
+(defvar buffer-ribbon/global-patch-grid nil
+  "use buffer-ribbon/current-patch-grid function instead of accessing this directly")
+
+(defun buffer-ribbon/set-patch-grid-window-parameters (window patch-grid-position)
+  (set-window-parameter window 'is-patch-grid t)
+  (set-window-parameter window 'patch-grid-position patch-grid-position))
+
+(defun buffer-ribbon/patch-grid-window-p (window)
+  (window-parameter window 'is-patched-grid))
+
+(defun buffer-ribbon/patch-grid-window-position (window)
+  (window-parameter window 'patch-grid-position))
+
+(defun buffer-ribbon/make-patch-grid (root-window windows)
+  (let ((patch-grid (list 'patch-grid
+                          root-window
+                          windows)))
+    ;; assign parameters to each of the window
+    (-each-indexed (lambda (index window)
+                     (buffer-ribbon/set-patch-grid-window-parameters window index))
+                   windows)
+    patch-grid))
+
+(defun buffer-ribbon/patch-grid-p (o)
+  (and (listp o)
+       (eq 'patch-grid (car o))
+       (windowp (cadr o))
+       (listp (caddr o))))
+
+(defun buffer-ribbon/patch-grid-root-window (patch-grid)
+  (if (buffer-ribbon/patch-grid-p patch-grid)
+      (cadr patch-grid)
+      (signal 'wrong-type-argument (list buffer-ribbon/patch-grid-p patch-grid))))
+
+(defun buffer-ribbon/set-patch-grid-root-window (patch-grid new-root-window)
+  (if (buffer-ribbon/patch-grid-p patch-grid)
+      (setcdr patch-grid
+              (cons new-root-window
+                    (list (caddr patch-grid))))
+      (signal 'wrong-type-argument (list buffer-ribbon/patch-grid-p patch-grid))))
+
+(defun buffer-ribbon/patch-grid-windows (patch-grid)
+  (if (buffer-ribbon/patch-grid-p patch-grid)
+      (caddr patch-grid)
+      (signal 'wrong-type-argument (list buffer-ribbon/patch-grid-p patch-grid))))
+
+(defun buffer-ribbon/set-patch-grid-windows (patch-grid new-windows)
+  (if (buffer-ribbon/patch-grid-p patch-grid)
+      (setcdr patch-grid
+              (cons (cadr patch grid)
+                    (list new-windows)))
+      (signal 'wrong-type-argument (list buffer-ribbon/patch-grid-p patch-grid))))
+
+(defun buffer-ribbon/current-patch-grid ()
+  buffer-ribbon/global-patch-grid)
+
+(defun buffer-ribbon/patch-grid-width (&optional patch-grid)
+  "number of columns the patch grid has"
+  3)
+
+(defun buffer-ribbon/patch-grid-height (&optional patch-grid)
+  "number of rows the patch grid has"
+  2)
+
 ;; this is useful because (window-list) returns
 ;; in an order I might not like
 ;;
@@ -134,7 +198,6 @@ past its defined"
             (apply '-concat children))))))
 
 (defun buffer-ribbon/push-buffer-ribbon-to-patch-grid ()
-  ;; assumes that buffer-ribbon-position
   (let* ((start buffer-ribbon-position)
          (end   (+ 6 buffer-ribbon-position))
          (new-buffers (-slice buffer-ribbon-buffers start end))
@@ -166,6 +229,10 @@ grid with the buffers in the patch grid"
                       current-buffers
                       new-tail))))))
 
+;;; this method is pretty brutal.
+;;; can simplify it as: ribbon-num-cols;
+;;; and operating in terms of columns.
+;;; that ought to simplify this enough.
 (defun buffer-ribbon/adjust-ribbon-position (col-delta)
   "update buffer-ribbon-buffers by col-delta
 so that buffer-ribbon-position and buffer-ribbon-buffers
