@@ -129,6 +129,30 @@ past its defined"
          (new-buffers (buffer-ribbon/list-replace-at-offset old-buffers pos new-buffers)))
     (buffer-ribbon/set-buffer-ribbon-buffers buffer-ribbon new-buffers)))
 
+(defun buffer-ribbon/buffer-ribbon-width (buffer-ribbon)
+  (let ((buffers (buffer-ribbon/buffer-ribbon-buffers buffer-ribbon))
+        (column-height (buffer-ribbon/buffer-ribbon-height buffer-ribbon)))
+    (/ (length buffers) column-height)))
+
+(defun buffer-ribbon/buffer-ribbon-column (buffer-ribbon)
+  (let ((position (buffer-ribbon/buffer-ribbon-position buffer-ribbon))
+        (column-height (buffer-ribbon/buffer-ribbon-height buffer-ribbon)))
+    (/ position column-height)))
+
+(defun buffer-ribbon/buffer-ribbon-append-column (buffer-ribbon)
+  (let* ((column-height (buffer-ribbon/buffer-ribbon-height buffer-ribbon))
+         (add-buffers (buffer-ribbon/empty-buffers column-height))
+         (old-buffers (buffer-ribbon/buffer-ribbon-buffers buffer-ribbon)))
+    (buffer-ribbon/set-buffer-ribbon-buffers buffer-ribbon (append old-buffers add-buffers))))
+
+(defun buffer-ribbon/buffer-ribbon-prepend-column (buffer-ribbon)
+  (let* ((column-height (buffer-ribbon/buffer-ribbon-height buffer-ribbon))
+         (add-buffers (buffer-ribbon/empty-buffers column-height))
+         (old-buffers (buffer-ribbon/buffer-ribbon-buffers buffer-ribbon))
+         (old-position (buffer-ribbon/buffer-ribbon-position buffer-ribbon)))
+    (buffer-ribbon/set-buffer-ribbon-buffers buffer-ribbon (append add-buffers old-buffers))
+    (buffer-ribbon/set-buffer-ribbon-position buffer-ribbon (+ old-position column-height))))
+
 ;;;; patch grid methods
 
 (defvar buffer-ribbon/global-patch-grid nil
@@ -249,34 +273,6 @@ grid with the buffers in the patch grid"
   (let* ((windows (buffer-ribbon/patch-grid-windows patch-grid))
          (buffers (mapcar 'window-buffer windows)))
     (buffer-ribbon/buffer-ribbon-set-buffers-at-position buffer-ribbon buffers)))
-
-(defun buffer-ribbon/buffer-ribbon-buffer-count (buffer-ribbon patch-grid)
-  (let ((buffers (buffer-ribbon/buffer-ribbon-buffers buffer-ribbon)))
-    (length buffers)))
-
-(defun buffer-ribbon/buffer-ribbon-width (buffer-ribbon)
-  (let ((buffers (buffer-ribbon/buffer-ribbon-buffers buffer-ribbon))
-        (column-height (buffer-ribbon/buffer-ribbon-height buffer-ribbon)))
-    (/ (length buffers) column-height)))
-
-(defun buffer-ribbon/buffer-ribbon-column (buffer-ribbon)
-  (let ((position (buffer-ribbon/buffer-ribbon-position buffer-ribbon))
-        (column-height (buffer-ribbon/buffer-ribbon-height buffer-ribbon)))
-    (/ position column-height)))
-
-(defun buffer-ribbon/buffer-ribbon-append-column (buffer-ribbon)
-  (let* ((column-height (buffer-ribbon/buffer-ribbon-height buffer-ribbon))
-         (add-buffers (buffer-ribbon/empty-buffers column-height))
-         (old-buffers (buffer-ribbon/buffer-ribbon-buffers buffer-ribbon)))
-    (buffer-ribbon/set-buffer-ribbon-buffers buffer-ribbon (append old-buffers add-buffers))))
-
-(defun buffer-ribbon/buffer-ribbon-prepend-column (buffer-ribbon)
-  (let* ((column-height (buffer-ribbon/buffer-ribbon-height buffer-ribbon))
-         (add-buffers (buffer-ribbon/empty-buffers column-height))
-         (old-buffers (buffer-ribbon/buffer-ribbon-buffers buffer-ribbon))
-         (old-position (buffer-ribbon/buffer-ribbon-position buffer-ribbon)))
-    (buffer-ribbon/set-buffer-ribbon-buffers buffer-ribbon (append add-buffers old-buffers))
-    (buffer-ribbon/set-buffer-ribbon-position buffer-ribbon (+ old-position column-height))))
 
 (defun buffer-ribbon/adjust-ribbon-position (buffer-ribbon patch-grid column-delta)
   (buffer-ribbon/update-buffer-ribbon-from-patch-grid buffer-ribbon patch-grid)
