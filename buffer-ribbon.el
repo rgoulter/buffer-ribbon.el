@@ -326,6 +326,21 @@ grid with the buffers in the patch grid"
       (set-window-configuration window-config)
       (set-frame-parameter nil 'buffer-ribbon-window-config nil))))
 
+(defun buffer-ribbon/select-patch-grid-window (col row)
+  "select the window in the patch grid at the given column and row.
+0-based, i.e. row 0 is the top, row 1 is the row below that.
+column 0 is the left, column 1 is the column to the right of that."
+  (let* ((patch-grid (buffer-ribbon/current-patch-grid))
+         (height (buffer-ribbon/patch-grid-height patch-grid))
+         (windows (buffer-ribbon/patch-grid-windows patch-grid))
+         (window-position (+ (* col height) row))
+         (window (get-window-with-predicate
+                  (lambda (window)
+                    (= window-position
+                       (buffer-ribbon/patch-grid-window-position window))))))
+    (when window
+      (select-window window))))
+
 ;; (add-hook
 ;;  'window-configuration-change-hook
 ;;  'buffer-ribbon/update-ribbon-buffers)
