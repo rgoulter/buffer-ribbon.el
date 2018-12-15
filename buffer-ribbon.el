@@ -1,6 +1,4 @@
-;;;;
-;; window grid methods
-;;;;
+;;;; window grid methods
 
 ;; splitting vertically ('below) first, then horizontally
 ;; means that other-window navigates "right" across
@@ -28,9 +26,7 @@
     (split-window right-window nil 'below)
     (balance-windows)))
 
-;;;;
-;; "dummy" buffer methods
-;;;;
+;;;; "dummy" buffer methods
 
 (defun buffer-ribbon/--dummy-buffer-with-number (&optional num)
   (interactive)
@@ -46,9 +42,7 @@
   (dotimes (i 12)
     (buffer-ribbon/--dummy-buffer-with-number i)))
 
-;;;;
-;; buffer ribbon methods
-;;;;
+;;;; buffer ribbon methods
 
 (defvar buffer-ribbon/global-ribbon nil
   "use buffer-ribbon/current-ribbon function instead of accessing this directly")
@@ -135,9 +129,7 @@ past its defined"
          (new-buffers (buffer-ribbon/list-replace-at-offset old-buffers pos new-buffers)))
     (buffer-ribbon/set-buffer-ribbon-buffers buffer-ribbon new-buffers)))
 
-;;;;
-;; patch grid methods
-;;;;
+;;;; patch grid methods
 
 (defvar buffer-ribbon/global-patch-grid nil
   "use buffer-ribbon/current-patch-grid function instead of accessing this directly")
@@ -304,10 +296,7 @@ grid with the buffers in the patch grid"
     (buffer-ribbon/set-buffer-ribbon-position buffer-ribbon (+ old-position delta-position)))
   (buffer-ribbon/push-buffer-ribbon-to-patch-grid buffer-ribbon patch-grid))
 
-
-;;;;
-;; user-facing commands
-;;;;
+;;;; user-facing commands
 
 (defun buffer-ribbon/init-from-current-windows ()
   (interactive)
