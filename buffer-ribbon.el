@@ -34,7 +34,6 @@
 ;;;; "dummy" buffer methods
 
 (defun buffer-ribbon/--dummy-buffer-with-number (&optional num)
-  (interactive)
   (let ((buf (generate-new-buffer "*ribbon-dummy*"))
         (num (or num 2)))
     (with-current-buffer  buf
@@ -43,7 +42,6 @@
       (set-buffer-modified-p (buffer-modified-p)))))
 
 (defun buffer-ribbon/--make-dozen-dummy-buffers ()
-  (interactive)
   (dotimes (i 12)
     (buffer-ribbon/--dummy-buffer-with-number i)))
 
