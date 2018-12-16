@@ -17,14 +17,19 @@
 ;; then down.
 ;; I think this is a nicer way of thinking about
 ;; a "ribbon" of buffers.
-(defun buffer-ribbon/split-into-3-2 ()
+(defun buffer-ribbon/split-into-3-2 (&optional window)
   (interactive)
-  (let* ((mid-window (split-window nil nil 'right))
-         (right-window (split-window mid-window nil 'right)))
-    (split-window nil nil 'below)
-    (split-window mid-window nil 'below)
-    (split-window right-window nil 'below)
-    (balance-windows)))
+  (let* ((window (or window (selected-window)))
+         (mid-window (split-window window nil 'right))
+         (right-window (split-window mid-window nil 'right))
+         (windows (list window
+                        (split-window window nil 'below)
+                        mid-window
+                        (split-window mid-window nil 'below)
+                        right-window
+                        (split-window right-window nil 'below))))
+    (balance-windows)
+    windows))
 
 ;;;; "dummy" buffer methods
 
@@ -292,7 +297,26 @@ grid with the buffers in the patch grid"
 
 ;;;; user-facing commands
 
+(defun buffer-ribbon/init-patch-grid-using-selected-window (&optional window)
+  "Use this command to construct a patch grid using the
+selected window."
+  (interactive)
+  (let* ((window (or window (selected-window)))
+         (buffer-ribbon (buffer-ribbon/make-buffer-ribbon))
+         (grid-windows (buffer-ribbon/split-into-3-2 window))
+         (patch-grid (buffer-ribbon/make-patch-grid
+                      buffer-ribbon
+                      grid-windows)))
+    (setq buffer-ribbon/global-patch-grid patch-grid)
+    (buffer-ribbon/update-buffer-ribbon-from-patch-grid buffer-ribbon patch-grid)))
+
 (defun buffer-ribbon/init-from-current-windows ()
+  "Use this command if you already have a 3x2 grid
+of window tiles on the screen and want to use
+these as a patch grid.
+
+Note that all windows (excluding minibuffer) in the
+frame will be considered for the patch grid."
   (interactive)
   (let* ((buffer-ribbon (buffer-ribbon/make-buffer-ribbon))
          (current-windows (buffer-ribbon/list-of-windows-in-ribbon-order))
