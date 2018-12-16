@@ -16,8 +16,8 @@
 (defun buffer-ribbon/kludge-use-blank-global-vars (body)
   "kludge to allow test which uses the ribbon/patch grid
 which is currently a global variable."
-  (let ((old-buffer-ribbon buffer-ribbon/global-ribbon)
-        (old-patch-grid buffer-ribbon/global-patch-grid))
+  (let ((old-patch-grid buffer-ribbon/global-patch-grid)
+        (old-buffer-ribbon (buffer-ribbon/current-buffer-ribbon)))
   (unwind-protect
       (progn (setq buffer-ribbon/global-ribbon nil)
              (setq buffer-ribbon/global-patch-grid nil)
