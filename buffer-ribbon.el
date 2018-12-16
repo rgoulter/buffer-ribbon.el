@@ -59,19 +59,19 @@
 (defun buffer-ribbon/buffer-ribbon-buffers (ribbon)
   (if (buffer-ribbon/buffer-ribbon-p ribbon)
       (cadr ribbon)
-      (signal 'wrong-type-argument (list buffer-ribbon/buffer-ribbon-p ribbon))))
+      (signal 'wrong-type-argument (list 'buffer-ribbon/buffer-ribbon-p ribbon))))
 
 (defun buffer-ribbon/set-buffer-ribbon-buffers (ribbon new-buffers)
   (if (buffer-ribbon/buffer-ribbon-p ribbon)
       (setcdr ribbon
               (cons new-buffers
                     (list (caddr ribbon))))
-      (signal 'wrong-type-argument (list buffer-ribbon/buffer-ribbon-p ribbon))))
+      (signal 'wrong-type-argument (list 'buffer-ribbon/buffer-ribbon-p ribbon))))
 
 (defun buffer-ribbon/buffer-ribbon-height (ribbon)
   (if (buffer-ribbon/buffer-ribbon-p ribbon)
       (caddr ribbon)
-      (signal 'wrong-type-argument (list buffer-ribbon/buffer-ribbon-p ribbon))))
+      (signal 'wrong-type-argument (list 'buffer-ribbon/buffer-ribbon-p ribbon))))
 
 (defun buffer-ribbon/current-buffer-ribbon ()
   (buffer-ribbon/patch-grid-buffer-ribbon
@@ -81,7 +81,8 @@
   "function which returns a buffer to assign
 as a 'default buffer' when moving the buffer-ribbon
 past its defined"
-  (get-buffer-create "*scratch*"))
+  (let ((empty (get-buffer-create "*empty*")))
+    (with-current-buffer empty (set-buffer-modified-p nil))))
 
 (defun buffer-ribbon/empty-buffers (n)
   (mapcar (lambda (_) (buffer-ribbon/empty-buffer))
@@ -156,7 +157,7 @@ past its defined"
 (defun buffer-ribbon/patch-grid-buffer-ribbon (patch-grid)
   (if (buffer-ribbon/patch-grid-p patch-grid)
       (cadr patch-grid)
-      (signal 'wrong-type-argument (list buffer-ribbon/patch-grid-p patch-grid))))
+      (signal 'wrong-type-argument (list 'buffer-ribbon/patch-grid-p patch-grid))))
 
 (defun buffer-ribbon/set-patch-buffer-ribbon (patch-grid new-buffer-ribbon)
   (if (buffer-ribbon/patch-grid-p patch-grid)
@@ -164,12 +165,12 @@ past its defined"
               (cons new-buffer-ribbon
                     (list (caddr patch-grid)
                           (cadddr patch-grid))))
-      (signal 'wrong-type-argument (list buffer-ribbon/patch-grid-p patch-grid))))
+      (signal 'wrong-type-argument (list 'buffer-ribbon/patch-grid-p patch-grid))))
 
 (defun buffer-ribbon/patch-grid-column (patch-grid)
   (if (buffer-ribbon/patch-grid-p patch-grid)
       (caddr patch-grid)
-      (signal 'wrong-type-argument (list buffer-ribbon/patch-grid-p patch-grid))))
+      (signal 'wrong-type-argument (list 'buffer-ribbon/patch-grid-p patch-grid))))
 
 (defun buffer-ribbon/set-patch-grid-column (patch-grid new-column)
   (if (buffer-ribbon/patch-grid-p patch-grid)
