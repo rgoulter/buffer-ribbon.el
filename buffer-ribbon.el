@@ -74,15 +74,17 @@
       (signal 'wrong-type-argument (list 'buffer-ribbon/buffer-ribbon-p ribbon))))
 
 (defun buffer-ribbon/current-buffer-ribbon ()
-  (buffer-ribbon/patch-grid-buffer-ribbon
-   (buffer-ribbon/current-patch-grid)))
+  (let ((patch-grid (buffer-ribbon/current-patch-grid)))
+    (when patch-grid
+      (buffer-ribbon/patch-grid-buffer-ribbon patch-grid))))
 
 (defun buffer-ribbon/empty-buffer ()
   "function which returns a buffer to assign
 as a 'default buffer' when moving the buffer-ribbon
 past its defined"
   (let ((empty (get-buffer-create "*empty*")))
-    (with-current-buffer empty (set-buffer-modified-p nil))))
+    (with-current-buffer empty (set-buffer-modified-p nil))
+    empty))
 
 (defun buffer-ribbon/empty-buffers (n)
   (mapcar (lambda (_) (buffer-ribbon/empty-buffer))
