@@ -302,14 +302,44 @@ grid with the buffers in the patch grid"
     (setq buffer-ribbon/global-patch-grid patch-grid)
     (buffer-ribbon/update-buffer-ribbon-from-patch-grid buffer-ribbon patch-grid)))
 
-(defun buffer-ribbon/shift-left ()
+(defun buffer-ribbon/scroll-buffer-ribbon-left ()
+  "Move the ribbon left along the patch grid.
+
+Buffers which were to the right of the patch grid view
+will come into view."
   (interactive)
   (buffer-ribbon/scroll-patch-grid-on-buffer-ribbon
    (buffer-ribbon/current-buffer-ribbon)
    (buffer-ribbon/current-patch-grid)
    +1))
 
-(defun buffer-ribbon/shift-right ()
+(defun buffer-ribbon/scroll-patch-grid-right ()
+  "Move the patch grid right along the ribbon.
+
+Buffers which were to the right of the patch grid view
+will come into view."
+  (interactive)
+  (buffer-ribbon/scroll-patch-grid-on-buffer-ribbon
+   (buffer-ribbon/current-buffer-ribbon)
+   (buffer-ribbon/current-patch-grid)
+   +1))
+
+(defun buffer-ribbon/scroll-buffer-ribbon-right ()
+  "Move the buffer ribbon right along the patch grid.
+
+Buffers which were to the left of the patch grid view
+will come into view."
+  (interactive)
+  (buffer-ribbon/scroll-patch-grid-on-buffer-ribbon
+   (buffer-ribbon/current-buffer-ribbon)
+   (buffer-ribbon/current-patch-grid)
+   -1))
+
+(defun buffer-ribbon/scroll-patch-grid-left ()
+  "Move the patch grid left along the buffer ribbon.
+
+Buffers which were to the left of the patch grid view
+will come into view."
   (interactive)
   (buffer-ribbon/scroll-patch-grid-on-buffer-ribbon
    (buffer-ribbon/current-buffer-ribbon)
