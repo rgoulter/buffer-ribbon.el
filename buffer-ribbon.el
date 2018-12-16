@@ -43,7 +43,7 @@
 
 (defun buffer-ribbon/--make-dozen-dummy-buffers ()
   (dotimes (i 12)
-    (buffer-ribbon/--dummy-buffer-with-number i)))
+           (buffer-ribbon/--dummy-buffer-with-number i)))
 
 ;;;; buffer ribbon methods
 
@@ -62,19 +62,19 @@
 (defun buffer-ribbon/buffer-ribbon-buffers (ribbon)
   (if (buffer-ribbon/buffer-ribbon-p ribbon)
       (cadr ribbon)
-      (signal 'wrong-type-argument (list 'buffer-ribbon/buffer-ribbon-p ribbon))))
+    (signal 'wrong-type-argument (list #'buffer-ribbon/buffer-ribbon-p ribbon))))
 
 (defun buffer-ribbon/set-buffer-ribbon-buffers (ribbon new-buffers)
   (if (buffer-ribbon/buffer-ribbon-p ribbon)
       (setcdr ribbon
               (cons new-buffers
                     (list (caddr ribbon))))
-      (signal 'wrong-type-argument (list 'buffer-ribbon/buffer-ribbon-p ribbon))))
+    (signal 'wrong-type-argument (list #'buffer-ribbon/buffer-ribbon-p ribbon))))
 
 (defun buffer-ribbon/buffer-ribbon-height (ribbon)
   (if (buffer-ribbon/buffer-ribbon-p ribbon)
       (caddr ribbon)
-      (signal 'wrong-type-argument (list 'buffer-ribbon/buffer-ribbon-p ribbon))))
+    (signal 'wrong-type-argument (list #'buffer-ribbon/buffer-ribbon-p ribbon))))
 
 (defun buffer-ribbon/current-buffer-ribbon ()
   (let ((patch-grid (buffer-ribbon/current-patch-grid)))
@@ -82,7 +82,7 @@
       (buffer-ribbon/patch-grid-buffer-ribbon patch-grid))))
 
 (defun buffer-ribbon/empty-buffer ()
-  "function which returns a buffer to assign
+  "Returns a buffer to assign
 as a 'default buffer' when moving the buffer-ribbon
 past its defined"
   (let ((empty (get-buffer-create "*empty*")))
@@ -97,9 +97,9 @@ past its defined"
   (let* ((len (length new-content))
          (new-head (-take offset old-list))
          (new-tail (-drop (+ offset len) old-list)))
-          (append new-head
-                  new-content
-                  new-tail)))
+    (append new-head
+            new-content
+            new-tail)))
 
 (defun buffer-ribbon/buffer-ribbon-width (buffer-ribbon)
   (let ((buffers (buffer-ribbon/buffer-ribbon-buffers buffer-ribbon))
@@ -172,7 +172,7 @@ The hash table with the hash table of patch grids, keyed by name.")
 (defun buffer-ribbon/patch-grid-buffer-ribbon (patch-grid)
   (if (buffer-ribbon/patch-grid-p patch-grid)
       (cadr patch-grid)
-      (signal 'wrong-type-argument (list 'buffer-ribbon/patch-grid-p patch-grid))))
+    (signal 'wrong-type-argument (list #'buffer-ribbon/patch-grid-p patch-grid))))
 
 (defun buffer-ribbon/set-patch-buffer-ribbon (patch-grid new-buffer-ribbon)
   (if (buffer-ribbon/patch-grid-p patch-grid)
@@ -180,12 +180,12 @@ The hash table with the hash table of patch grids, keyed by name.")
               (cons new-buffer-ribbon
                     (list (caddr patch-grid)
                           (cadddr patch-grid))))
-      (signal 'wrong-type-argument (list 'buffer-ribbon/patch-grid-p patch-grid))))
+    (signal 'wrong-type-argument (list #'buffer-ribbon/patch-grid-p patch-grid))))
 
 (defun buffer-ribbon/patch-grid-column (patch-grid)
   (if (buffer-ribbon/patch-grid-p patch-grid)
       (caddr patch-grid)
-      (signal 'wrong-type-argument (list 'buffer-ribbon/patch-grid-p patch-grid))))
+    (signal 'wrong-type-argument (list #'buffer-ribbon/patch-grid-p patch-grid))))
 
 (defun buffer-ribbon/set-patch-grid-column (patch-grid new-column)
   (if (buffer-ribbon/patch-grid-p patch-grid)
@@ -193,12 +193,12 @@ The hash table with the hash table of patch grids, keyed by name.")
               (cons (cadr patch-grid)
                     (list new-column
                           (cadddr patch-grid))))
-      (signal 'wrong-type-argument (list 'buffer-ribbon/patch-grid-p patch-grid))))
+    (signal 'wrong-type-argument (list #'buffer-ribbon/patch-grid-p patch-grid))))
 
 (defun buffer-ribbon/patch-grid-windows (patch-grid)
   (if (buffer-ribbon/patch-grid-p patch-grid)
       (cadddr patch-grid)
-      (signal 'wrong-type-argument (list 'buffer-ribbon/patch-grid-p patch-grid))))
+    (signal 'wrong-type-argument (list #'buffer-ribbon/patch-grid-p patch-grid))))
 
 (defun buffer-ribbon/set-patch-grid-windows (patch-grid new-windows)
   (if (buffer-ribbon/patch-grid-p patch-grid)
@@ -206,7 +206,7 @@ The hash table with the hash table of patch grids, keyed by name.")
               (cons (cadr patch grid)
                     (caddr patch grid)
                     (list new-windows)))
-      (signal 'wrong-type-argument (list 'buffer-ribbon/patch-grid-p patch-grid))))
+    (signal 'wrong-type-argument (list #'buffer-ribbon/patch-grid-p patch-grid))))
 
 (defun buffer-ribbon/patch-grid (name)
   (gethash name buffer-ribbon/global-patch-grid-hash))
@@ -220,10 +220,10 @@ The hash table with the hash table of patch grids, keyed by name.")
 Calls body if it is; throws warning if not."
   `(let ((window ,window))
      (if (buffer-ribbon/patch-grid-window-p window)
-        (if (buffer-ribbon/window-patch-grid-name window)
-            (progn ,@body)
-            (display-warning 'buffer-ribbon "no patch grid registered with window"))
-        (display-warning 'buffer-ribbon "window is not a patch grid tile"))))
+         (if (buffer-ribbon/window-patch-grid-name window)
+             (progn ,@body)
+           (display-warning 'buffer-ribbon "no patch grid registered with window"))
+       (display-warning 'buffer-ribbon "window is not a patch grid tile"))))
 
 (defun buffer-ribbon/current-patch-grid ()
   (buffer-ribbon/window-patch-grid (selected-window)))
@@ -234,7 +234,7 @@ Calls body if it is; throws warning if not."
 key must be a string."
   (let ((key-candidate (if number (format "%s<%d>" key number) key)))
     (if (not (gethash key-candidate hash))
-      key-candidate
+        key-candidate
       (buffer-ribbon/next-unique-key
        hash
        key
@@ -254,15 +254,15 @@ key must be a string."
             windows)))
 
 (defun buffer-ribbon/patch-grid-width (&optional patch-grid)
-  "number of columns the patch grid has"
+  "Number of columns the patch grid has"
   3)
 
 (defun buffer-ribbon/patch-grid-height (&optional patch-grid)
-  "number of rows the patch grid has"
+  "Number of rows the patch grid has"
   2)
 
 (defun buffer-ribbon/patch-grid-count (&optional patch-grid)
-  "number of tiles the patch grid has"
+  "Number of tiles the patch grid has"
   (* (buffer-ribbon/patch-grid-width)
      (buffer-ribbon/patch-grid-height)))
 
@@ -275,14 +275,14 @@ key must be a string."
 (defun buffer-ribbon/list-of-windows-in-ribbon-order (&optional win)
   (let ((win (or win (car (window-tree)))))
     (if (windowp win)
-      (list win)
+        (list win)
       (let* ((is-vert-split (car win))
              (children-wins (cddr win))
-             (children (mapcar 'buffer-ribbon/list-of-windows-in-ribbon-order
+             (children (mapcar #'buffer-ribbon/list-of-windows-in-ribbon-order
                                children-wins)))
         (if is-vert-split
-            (apply '-interleave children)
-            (apply '-concat children))))))
+            (apply #'-interleave children)
+          (apply #'-concat children))))))
 
 (defun buffer-ribbon/buffer-ribbon-buffers-for-patch-grid (buffer-ribbon patch-grid)
   "Returns the buffers in the ribbon which should be 'in view' of the patch grid.
@@ -312,14 +312,14 @@ or the buffer ribbon was updated (and the patch grid wasn't)."
 
 (defun buffer-ribbon/current-buffers-from-windows ()
   (let ((wins (buffer-ribbon/list-of-windows-in-ribbon-order)))
-    (mapcar 'window-buffer wins)))
+    (mapcar #'window-buffer wins)))
 
 (defun buffer-ribbon/patch-grid-buffers (patch-grid)
   (let ((windows (buffer-ribbon/patch-grid-windows patch-grid)))
-    (mapcar 'window-buffer windows)))
+    (mapcar #'window-buffer windows)))
 
 (defun buffer-ribbon/update-buffer-ribbon-from-patch-grid (buffer-ribbon patch-grid)
-  "replaces the part of the buffer ribbon which is visible on the patch
+  "Replaces the part of the buffer ribbon which is visible on the patch
 grid with the buffers in the patch grid"
   (let* ((buffers (buffer-ribbon/patch-grid-buffers patch-grid))
          (column (buffer-ribbon/patch-grid-column patch-grid))
@@ -347,6 +347,7 @@ grid with the buffers in the patch grid"
 
 ;;;; user-facing commands
 
+;;;###autoload
 (defun buffer-ribbon/init-patch-grid-using-selected-window (&optional window)
   "Use this command to construct a patch grid using the
 selected window."
@@ -360,6 +361,7 @@ selected window."
     (buffer-ribbon/register-patch-grid patch-grid)
     (buffer-ribbon/update-buffer-ribbon-from-patch-grid buffer-ribbon patch-grid)))
 
+;;;###autoload
 (defun buffer-ribbon/init-patch-grid-using-new-frame ()
   "Makes a new frame and constructs a patch grid using that."
   (interactive)
@@ -367,6 +369,7 @@ selected window."
     (select-frame new-frame)
     (buffer-ribbon/init-patch-grid-using-selected-window)))
 
+;;;###autoload
 (defun buffer-ribbon/init-patch-grid-using-current-windows ()
   "Use this command if you already have a 3x2 grid
 of window tiles on the screen and want to use
@@ -383,6 +386,7 @@ frame will be considered for the patch grid."
     (buffer-ribbon/register-patch-grid patch-grid)
     (buffer-ribbon/update-buffer-ribbon-from-patch-grid buffer-ribbon patch-grid)))
 
+;;;###autoload
 (defun buffer-ribbon/scroll-buffer-ribbon-left ()
   "Move the ribbon left along the patch grid.
 
@@ -391,10 +395,11 @@ will come into view."
   (interactive)
   (buffer-ribbon/check-window-is-patch-grid-tile (selected-window)
     (buffer-ribbon/scroll-patch-grid-on-buffer-ribbon
-      (buffer-ribbon/current-buffer-ribbon)
-      (buffer-ribbon/current-patch-grid)
-      +1)))
+     (buffer-ribbon/current-buffer-ribbon)
+     (buffer-ribbon/current-patch-grid)
+     +1)))
 
+;;;###autoload
 (defun buffer-ribbon/scroll-patch-grid-right ()
   "Move the patch grid right along the ribbon.
 
@@ -403,10 +408,11 @@ will come into view."
   (interactive)
   (buffer-ribbon/check-window-is-patch-grid-tile (selected-window)
     (buffer-ribbon/scroll-patch-grid-on-buffer-ribbon
-      (buffer-ribbon/current-buffer-ribbon)
-      (buffer-ribbon/current-patch-grid)
-      +1)))
+     (buffer-ribbon/current-buffer-ribbon)
+     (buffer-ribbon/current-patch-grid)
+     +1)))
 
+;;;###autoload
 (defun buffer-ribbon/scroll-buffer-ribbon-right ()
   "Move the buffer ribbon right along the patch grid.
 
@@ -415,10 +421,11 @@ will come into view."
   (interactive)
   (buffer-ribbon/check-window-is-patch-grid-tile (selected-window)
     (buffer-ribbon/scroll-patch-grid-on-buffer-ribbon
-      (buffer-ribbon/current-buffer-ribbon)
-      (buffer-ribbon/current-patch-grid)
-      -1)))
+     (buffer-ribbon/current-buffer-ribbon)
+     (buffer-ribbon/current-patch-grid)
+     -1)))
 
+;;;###autoload
 (defun buffer-ribbon/scroll-patch-grid-left ()
   "Move the patch grid left along the buffer ribbon.
 
@@ -427,16 +434,18 @@ will come into view."
   (interactive)
   (buffer-ribbon/check-window-is-patch-grid-tile (selected-window)
     (buffer-ribbon/scroll-patch-grid-on-buffer-ribbon
-      (buffer-ribbon/current-buffer-ribbon)
-      (buffer-ribbon/current-patch-grid)
-      -1)))
+     (buffer-ribbon/current-buffer-ribbon)
+     (buffer-ribbon/current-patch-grid)
+     -1)))
 
+;;;###autoload
 (defun buffer-ribbon/zoom-selected-window ()
   (interactive)
   (buffer-ribbon/check-window-is-patch-grid-tile (selected-window)
-    (set-frame-parameter nil 'buffer-ribbon-window-config (current-window-configuration))
+    (set-frame-parameter nil #'buffer-ribbon-window-config (current-window-configuration))
     (delete-other-windows)))
 
+;;;###autoload
 (defun buffer-ribbon/unzoom ()
   (interactive)
   (buffer-ribbon/check-window-is-patch-grid-tile (selected-window)
@@ -445,8 +454,9 @@ will come into view."
         (set-window-configuration window-config)
         (set-frame-parameter nil 'buffer-ribbon-window-config nil)))))
 
+;;;###autoload
 (defun buffer-ribbon/select-patch-grid-window (col row &optional window)
-  "select the window in the patch grid at the given column and row.
+  "Select the window in the patch grid at the given column and row.
 0-based, i.e. row 0 is the top, row 1 is the row below that.
 column 0 is the left, column 1 is the column to the right of that."
   (let ((window (or window (selected-window))))
@@ -455,10 +465,11 @@ column 0 is the left, column 1 is the column to the right of that."
              (height (buffer-ribbon/patch-grid-height patch-grid))
              (windows (buffer-ribbon/patch-grid-windows patch-grid))
              (window-position (+ (* col height) row))
-             (target-window (get-window-with-predicate
-                      (lambda (window)
-                        (= window-position
-                           (buffer-ribbon/patch-grid-window-position window))))))
+             (target-window
+              (get-window-with-predicate
+               (lambda (window)
+                 (= window-position
+                    (buffer-ribbon/patch-grid-window-position window))))))
         (when target-window
           (select-window target-window))))))
 
