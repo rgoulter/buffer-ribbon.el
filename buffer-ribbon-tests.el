@@ -50,7 +50,7 @@ which is currently a global variable."
         (funcall body (selected-frame))
         (set-window-configuration old-window-config)))))
 
-(ert-deftest buffer-ribbon/test-e2e-from-existing-shift-right-shift-left ()
+(ert-deftest buffer-ribbon/test-e2e-from-existing-scroll-right-scroll-left ()
   (buffer-ribbon/kludge-use-blank-global-vars
    (lambda ()
      ;; ASSEMBLE
@@ -70,7 +70,7 @@ which is currently a global variable."
                         (buffer-ribbon/patch-grid-windows (buffer-ribbon/current-patch-grid)))))
            ;; ACT
            ;;; shift to the right
-           (buffer-ribbon/shift-right)
+           (buffer-ribbon/scroll-buffer-ribbon-right)
            ;;; set the two 'new' grid buffers
            ;;; (since we shifted 'right' & started in (0,0),
            ;;;  need to replace (0,0) and (0,1)):
@@ -79,7 +79,7 @@ which is currently a global variable."
            (set-window-buffer nil (get-buffer-create "8"))
            (other-window -1)
            ;;; shift back to the left
-           (buffer-ribbon/shift-left)
+           (buffer-ribbon/scroll-buffer-ribbon-left)
            ;; ASSERT
            ;;; check that the buffers are the same as we set them
            (let ((actual-patch-grid-buffers (mapcar 'window-buffer
@@ -87,7 +87,7 @@ which is currently a global variable."
            (should (equal old-patch-grid-buffers
                           actual-patch-grid-buffers)))))))))
 
-(ert-deftest buffer-ribbon/test-e2e-from-existing-shift-left-shift-right ()
+(ert-deftest buffer-ribbon/test-e2e-from-existing-scroll-left-scroll-right ()
   (buffer-ribbon/kludge-use-blank-global-vars
    (lambda ()
      ;; ASSEMBLE
@@ -107,7 +107,7 @@ which is currently a global variable."
                         (buffer-ribbon/patch-grid-windows (buffer-ribbon/current-patch-grid)))))
            ;; ACT
            ;;; shift to the left
-           (buffer-ribbon/shift-left)
+           (buffer-ribbon/scroll-buffer-ribbon-left)
            ;;; set the two 'new' grid buffers
            ;;; (since we shifted 'left' & started in (0,0),
            ;;;  need to replace (2,0) and (2,1)):
@@ -117,7 +117,7 @@ which is currently a global variable."
            (set-window-buffer nil (get-buffer-create "8"))
            (other-window -5)
            ;;; shift back to the right
-           (buffer-ribbon/shift-right)
+           (buffer-ribbon/scroll-buffer-ribbon-right)
            ;; ASSERT
            ;;; check that the buffers are the same as we set them
            (let ((actual-patch-grid-buffers (mapcar 'window-buffer
