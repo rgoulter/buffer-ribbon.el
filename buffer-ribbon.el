@@ -195,12 +195,12 @@ The hash table with the hash table of patch grids, keyed by name.")
               (cons (cadr patch-grid)
                     (list new-column
                           (cadddr patch-grid))))
-      (signal 'wrong-type-argument (list buffer-ribbon/patch-grid-p patch-grid))))
+      (signal 'wrong-type-argument (list 'buffer-ribbon/patch-grid-p patch-grid))))
 
 (defun buffer-ribbon/patch-grid-windows (patch-grid)
   (if (buffer-ribbon/patch-grid-p patch-grid)
       (cadddr patch-grid)
-      (signal 'wrong-type-argument (list buffer-ribbon/patch-grid-p patch-grid))))
+      (signal 'wrong-type-argument (list 'buffer-ribbon/patch-grid-p patch-grid))))
 
 (defun buffer-ribbon/set-patch-grid-windows (patch-grid new-windows)
   (if (buffer-ribbon/patch-grid-p patch-grid)
@@ -208,7 +208,7 @@ The hash table with the hash table of patch grids, keyed by name.")
               (cons (cadr patch grid)
                     (caddr patch grid)
                     (list new-windows)))
-      (signal 'wrong-type-argument (list buffer-ribbon/patch-grid-p patch-grid))))
+      (signal 'wrong-type-argument (list 'buffer-ribbon/patch-grid-p patch-grid))))
 
 (defun buffer-ribbon/patch-grid (name)
   (gethash name buffer-ribbon/global-patch-grid-hash))
@@ -216,6 +216,16 @@ The hash table with the hash table of patch grids, keyed by name.")
 (defun buffer-ribbon/window-patch-grid (window)
   (let ((patch-grid-name (buffer-ribbon/window-patch-grid-name window)))
     (buffer-ribbon/patch-grid patch-grid-name)))
+
+(defmacro buffer-ribbon/check-window-is-patch-grid-tile (window &rest body)
+  "Checks whether the window is a patch grid tile.
+Calls body if it is; throws warning if not."
+  `(let ((window ,window))
+     (if (buffer-ribbon/patch-grid-window-p window)
+        (if (buffer-ribbon/window-patch-grid-name window)
+            (progn ,@body)
+            (display-warning 'buffer-ribbon "no patch grid registered with window"))
+        (display-warning 'buffer-ribbon "window is not a patch grid tile"))))
 
 (defun buffer-ribbon/current-patch-grid ()
   (buffer-ribbon/window-patch-grid (selected-window)))
@@ -374,10 +384,11 @@ frame will be considered for the patch grid."
 Buffers which were to the right of the patch grid view
 will come into view."
   (interactive)
-  (buffer-ribbon/scroll-patch-grid-on-buffer-ribbon
-   (buffer-ribbon/current-buffer-ribbon)
-   (buffer-ribbon/current-patch-grid)
-   +1))
+  (buffer-ribbon/check-window-is-patch-grid-tile (selected-window)
+    (buffer-ribbon/scroll-patch-grid-on-buffer-ribbon
+      (buffer-ribbon/current-buffer-ribbon)
+      (buffer-ribbon/current-patch-grid)
+      +1)))
 
 (defun buffer-ribbon/scroll-patch-grid-right ()
   "Move the patch grid right along the ribbon.
@@ -385,10 +396,11 @@ will come into view."
 Buffers which were to the right of the patch grid view
 will come into view."
   (interactive)
-  (buffer-ribbon/scroll-patch-grid-on-buffer-ribbon
-   (buffer-ribbon/current-buffer-ribbon)
-   (buffer-ribbon/current-patch-grid)
-   +1))
+  (buffer-ribbon/check-window-is-patch-grid-tile (selected-window)
+    (buffer-ribbon/scroll-patch-grid-on-buffer-ribbon
+      (buffer-ribbon/current-buffer-ribbon)
+      (buffer-ribbon/current-patch-grid)
+      +1)))
 
 (defun buffer-ribbon/scroll-buffer-ribbon-right ()
   "Move the buffer ribbon right along the patch grid.
@@ -396,10 +408,11 @@ will come into view."
 Buffers which were to the left of the patch grid view
 will come into view."
   (interactive)
-  (buffer-ribbon/scroll-patch-grid-on-buffer-ribbon
-   (buffer-ribbon/current-buffer-ribbon)
-   (buffer-ribbon/current-patch-grid)
-   -1))
+  (buffer-ribbon/check-window-is-patch-grid-tile (selected-window)
+    (buffer-ribbon/scroll-patch-grid-on-buffer-ribbon
+      (buffer-ribbon/current-buffer-ribbon)
+      (buffer-ribbon/current-patch-grid)
+      -1)))
 
 (defun buffer-ribbon/scroll-patch-grid-left ()
   "Move the patch grid left along the buffer ribbon.
@@ -407,38 +420,42 @@ will come into view."
 Buffers which were to the left of the patch grid view
 will come into view."
   (interactive)
-  (buffer-ribbon/scroll-patch-grid-on-buffer-ribbon
-   (buffer-ribbon/current-buffer-ribbon)
-   (buffer-ribbon/current-patch-grid)
-   -1))
+  (buffer-ribbon/check-window-is-patch-grid-tile (selected-window)
+    (buffer-ribbon/scroll-patch-grid-on-buffer-ribbon
+      (buffer-ribbon/current-buffer-ribbon)
+      (buffer-ribbon/current-patch-grid)
+      -1)))
 
 (defun buffer-ribbon/zoom-selected-window ()
   (interactive)
-  (when (buffer-ribbon/patch-grid-window-p (selected-window))
+  (buffer-ribbon/check-window-is-patch-grid-tile (selected-window)
     (set-frame-parameter nil 'buffer-ribbon-window-config (current-window-configuration))
     (delete-other-windows)))
 
 (defun buffer-ribbon/unzoom ()
   (interactive)
-  (let ((window-config (frame-parameter nil 'buffer-ribbon-window-config)))
-    (when window-config
-      (set-window-configuration window-config)
-      (set-frame-parameter nil 'buffer-ribbon-window-config nil))))
+  (buffer-ribbon/check-window-is-patch-grid-tile (selected-window)
+    (let ((window-config (frame-parameter nil 'buffer-ribbon-window-config)))
+      (when window-config
+        (set-window-configuration window-config)
+        (set-frame-parameter nil 'buffer-ribbon-window-config nil)))))
 
-(defun buffer-ribbon/select-patch-grid-window (col row)
+(defun buffer-ribbon/select-patch-grid-window (col row &optional window)
   "select the window in the patch grid at the given column and row.
 0-based, i.e. row 0 is the top, row 1 is the row below that.
 column 0 is the left, column 1 is the column to the right of that."
-  (let* ((patch-grid (buffer-ribbon/current-patch-grid))
-         (height (buffer-ribbon/patch-grid-height patch-grid))
-         (windows (buffer-ribbon/patch-grid-windows patch-grid))
-         (window-position (+ (* col height) row))
-         (window (get-window-with-predicate
-                  (lambda (window)
-                    (= window-position
-                       (buffer-ribbon/patch-grid-window-position window))))))
-    (when window
-      (select-window window))))
+  (let ((window (or window (selected-window))))
+    (buffer-ribbon/check-window-is-patch-grid-tile window
+      (let* ((patch-grid (buffer-ribbon/current-patch-grid))
+             (height (buffer-ribbon/patch-grid-height patch-grid))
+             (windows (buffer-ribbon/patch-grid-windows patch-grid))
+             (window-position (+ (* col height) row))
+             (target-window (get-window-with-predicate
+                      (lambda (window)
+                        (= window-position
+                           (buffer-ribbon/patch-grid-window-position window))))))
+        (when target-window
+          (select-window target-window))))))
 
 ;; (add-hook
 ;;  'window-configuration-change-hook
