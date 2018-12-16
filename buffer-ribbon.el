@@ -74,15 +74,17 @@
       (signal 'wrong-type-argument (list 'buffer-ribbon/buffer-ribbon-p ribbon))))
 
 (defun buffer-ribbon/current-buffer-ribbon ()
-  (buffer-ribbon/patch-grid-buffer-ribbon
-   (buffer-ribbon/current-patch-grid)))
+  (let ((patch-grid (buffer-ribbon/current-patch-grid)))
+    (when patch-grid
+      (buffer-ribbon/patch-grid-buffer-ribbon patch-grid))))
 
 (defun buffer-ribbon/empty-buffer ()
   "function which returns a buffer to assign
 as a 'default buffer' when moving the buffer-ribbon
 past its defined"
   (let ((empty (get-buffer-create "*empty*")))
-    (with-current-buffer empty (set-buffer-modified-p nil))))
+    (with-current-buffer empty (set-buffer-modified-p nil))
+    empty))
 
 (defun buffer-ribbon/empty-buffers (n)
   (mapcar (lambda (_) (buffer-ribbon/empty-buffer))
@@ -271,7 +273,14 @@ grid with the buffers in the patch grid"
          (new-buffers (buffer-ribbon/list-replace-at-offset old-buffers offset buffers)))
     (buffer-ribbon/set-buffer-ribbon-buffers buffer-ribbon new-buffers)))
 
+(setq mydbg (get-buffer-create "wtf"))
 (defun buffer-ribbon/scroll-patch-grid-on-buffer-ribbon (buffer-ribbon patch-grid column-delta)
+  (princ "\n\nWTF, begin:" mydbg)
+  (princ "\nbuffer ribbon:\n" mydbg)
+  (princ buffer-ribbon mydbg)
+  (princ "\npatch grid:\n" mydbg)
+  (princ patch-grid mydbg)
+  (princ "\n\nand scroll:\n" mydbg)
   (buffer-ribbon/update-buffer-ribbon-from-patch-grid buffer-ribbon patch-grid)
   (let* ((old-column (buffer-ribbon/patch-grid-column patch-grid))
          (ribbon-width (buffer-ribbon/buffer-ribbon-width buffer-ribbon))
@@ -286,7 +295,14 @@ grid with the buffers in the patch grid"
       (buffer-ribbon/buffer-ribbon-append-column buffer-ribbon)))
   (let* ((old-column (buffer-ribbon/patch-grid-column patch-grid)))
     (buffer-ribbon/set-patch-grid-column patch-grid (+ old-column column-delta)))
-  (buffer-ribbon/push-buffer-ribbon-to-patch-grid buffer-ribbon patch-grid))
+  (princ "\n\nWTF, before push:" mydbg)
+  (princ "\nbuffer ribbon:\n" mydbg)
+  (princ buffer-ribbon mydbg)
+  (princ "\npatch grid:\n" mydbg)
+  (princ patch-grid mydbg)
+  (princ "\nWTF, end" mydbg)
+  (buffer-ribbon/push-buffer-ribbon-to-patch-grid buffer-ribbon patch-grid)
+  )
 
 ;;;; user-facing commands
 
