@@ -6,7 +6,10 @@
 
 ;;; Code:
 
+(require 'cl)  ;; for caddr
+(require 'dash)
 (require 'ert)
+
 (require 'buffer-ribbon)
 
 (ert-deftest buffer-ribbon/test-make-buffer-ribbon ()
@@ -25,13 +28,35 @@ which is currently a global variable."
     (progn (setq buffer-ribbon/global-ribbon old-buffer-ribbon)
            (setq buffer-ribbon/global-patch-grid old-patch-grid)))))
 
+;; My experience: Debian on WSL can't run make-frame in -batch,
+;; (make-frame also doesn't work in MSYS2 shell, or CMD shell;
+;;  although set-frame-size doesn't work in emacs -batch run from
+;;  MSYS2 shell or CMD shell either).
+;; To run tests headlessly with -batch, I can accept using the
+;;  selected frame, but I'd like to use a separate frame when
+;;  running the ERT tests from a w32 session.
+(defun buffer-ribbon/run-with-test-frame (body)
+  (if (and (eq 'w32 (window-system))
+           (not (tty-type)))
+    (let ((test-frame (make-frame)))
+      (unwind-protect
+        (with-selected-frame test-frame (funcall body test-frame))
+        (delete-frame test-frame)))
+    (progn
+      ;; tty's frame starts 10x10 which
+      ;; isn't large enough for splitting into 3x2.
+      (set-frame-size (selected-frame) 188 48)
+      (let ((old-window-config (current-window-configuration)))
+        (funcall body (selected-frame))
+        (set-window-configuration old-window-config)))))
+
 (ert-deftest buffer-ribbon/test-e2e-from-existing-shift-right-shift-left ()
   (buffer-ribbon/kludge-use-blank-global-vars
    (lambda ()
      ;; ASSEMBLE
      ;;; make a frame
-     (let ((test-frame (make-frame)))
-       (with-selected-frame test-frame
+     (buffer-ribbon/run-with-test-frame
+       (lambda (test-frame)
          ;;; split into 3x2
          (buffer-ribbon/split-into-3-2)
          ;;; set each of them to distinct buffers
@@ -60,16 +85,15 @@ which is currently a global variable."
            (let ((actual-patch-grid-buffers (mapcar 'window-buffer
                         (buffer-ribbon/patch-grid-windows (buffer-ribbon/current-patch-grid)))))
            (should (equal old-patch-grid-buffers
-                          actual-patch-grid-buffers))
-           (delete-frame test-frame))))))))
+                          actual-patch-grid-buffers)))))))))
 
 (ert-deftest buffer-ribbon/test-e2e-from-existing-shift-left-shift-right ()
   (buffer-ribbon/kludge-use-blank-global-vars
    (lambda ()
      ;; ASSEMBLE
      ;;; make a frame
-     (let ((test-frame (make-frame)))
-       (with-selected-frame test-frame
+     (buffer-ribbon/run-with-test-frame
+       (lambda (test-frame)
          ;;; split into 3x2
          (buffer-ribbon/split-into-3-2)
          ;;; set each of them to distinct buffers
@@ -99,9 +123,7 @@ which is currently a global variable."
            (let ((actual-patch-grid-buffers (mapcar 'window-buffer
                         (buffer-ribbon/patch-grid-windows (buffer-ribbon/current-patch-grid)))))
            (should (equal old-patch-grid-buffers
-                          actual-patch-grid-buffers))
-           (delete-frame test-frame))))))))
-
+                          actual-patch-grid-buffers)))))))))
 
 (provide 'buffer-ribbon-tests)
 
