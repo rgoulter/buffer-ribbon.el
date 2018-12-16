@@ -50,7 +50,7 @@
         (set-window-buffer nil (get-buffer-create (int-to-string (+ 1 i))))
         (other-window +1))
       ;;; now init from existing grid
-      (buffer-ribbon/init-from-current-windows)
+      (buffer-ribbon/init-patch-grid-using-current-windows)
       (let ((old-patch-grid-buffers
              (mapcar 'window-buffer
                      (buffer-ribbon/patch-grid-windows (buffer-ribbon/current-patch-grid)))))
@@ -85,7 +85,7 @@
         (set-window-buffer nil (get-buffer-create (int-to-string (+ 1 i))))
         (other-window +1))
       ;;; now init from existing grid
-      (buffer-ribbon/init-from-current-windows)
+      (buffer-ribbon/init-patch-grid-using-current-windows)
       (let ((old-patch-grid-buffers
              (mapcar 'window-buffer
                      (buffer-ribbon/patch-grid-windows (buffer-ribbon/current-patch-grid)))))

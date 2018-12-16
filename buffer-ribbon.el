@@ -362,7 +362,7 @@ selected window."
     (buffer-ribbon/register-patch-grid patch-grid)
     (buffer-ribbon/update-buffer-ribbon-from-patch-grid buffer-ribbon patch-grid)))
 
-(defun buffer-ribbon/init-from-current-windows ()
+(defun buffer-ribbon/init-patch-grid-using-current-windows ()
   "Use this command if you already have a 3x2 grid
 of window tiles on the screen and want to use
 these as a patch grid.
