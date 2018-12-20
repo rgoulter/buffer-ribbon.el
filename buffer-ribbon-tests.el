@@ -1,6 +1,5 @@
 ;;; buffer-ribbon-tests.el --- Tests buffer-ribbon with ERT  -*- lexical-binding:t -*-
 
-
 ;;; Commentary:
 
 ;; ERT tests for buffer-ribbon.el
@@ -8,8 +7,6 @@
 ;;; Code:
 
 (require 'ert)
-
-(require 'buffer-ribbon)
 
 (ert-deftest buffer-ribbon/test-make-buffer-ribbon ()
   (should-not (equal nil
@@ -23,6 +20,7 @@
 ;;  selected frame, but I'd like to use a separate frame when
 ;;  running the ERT tests from a w32 session.
 (defun buffer-ribbon/run-with-test-frame (body)
+  "Call BODY in an appropriate frame."
   (if (and (eq 'w32 (window-system))
            (not (tty-type)))
     (let ((test-frame (make-frame)))
@@ -38,10 +36,11 @@
         (set-window-configuration old-window-config)))))
 
 (ert-deftest buffer-ribbon/test-e2e-from-existing-scroll-right-scroll-left ()
+  "Test that the patch-grid can scroll right then scroll left correctly."
   ;; ASSEMBLE
   ;;; make a frame
   (buffer-ribbon/run-with-test-frame
-    (lambda (test-frame)
+    (lambda (_test-frame)
       ;;; split into 3x2
       (buffer-ribbon/split-into-3-2)
       ;;; set each of them to distinct buffers
@@ -73,10 +72,11 @@
                        actual-patch-grid-buffers)))))))
 
 (ert-deftest buffer-ribbon/test-e2e-from-existing-scroll-left-scroll-right ()
+  "Test that the patch-grid can scroll right then scroll left correctly."
   ;; ASSEMBLE
   ;;; make a frame
   (buffer-ribbon/run-with-test-frame
-    (lambda (test-frame)
+    (lambda (_test-frame)
       ;;; split into 3x2
       (buffer-ribbon/split-into-3-2)
       ;;; set each of them to distinct buffers
