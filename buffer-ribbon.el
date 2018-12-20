@@ -1,3 +1,17 @@
+;;; buffer-ribbon.el --- a buffer ribbon  -*- lexical-binding:t -*-
+
+;;; Commentary:
+
+;;; This file provides commands which are useful for
+;;; easily setting up and manipulating a grid of windows,
+;;; as well as "scrolling" a ribbon of buffers through this
+;;; grid.
+
+;;; Code:
+
+(require 'cl)  ; for cddr, caddr, etc.
+(require 'dash)
+
 ;;;; window grid methods
 
 ;; splitting vertically ('below) first, then horizontally
@@ -203,8 +217,8 @@ The hash table with the hash table of patch grids, keyed by name.")
 (defun buffer-ribbon/set-patch-grid-windows (patch-grid new-windows)
   (if (buffer-ribbon/patch-grid-p patch-grid)
       (setcdr patch-grid
-              (cons (cadr patch grid)
-                    (caddr patch grid)
+              (cons (cadr patch-grid)
+                    (caddr patch-grid)
                     (list new-windows)))
     (signal 'wrong-type-argument (list #'buffer-ribbon/patch-grid-p patch-grid))))
 

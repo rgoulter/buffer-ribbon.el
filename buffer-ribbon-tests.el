@@ -1,4 +1,5 @@
-;;; buffer-ribbon-tests.el --- Tests buffer-ribbon with ERT
+;;; buffer-ribbon-tests.el --- Tests buffer-ribbon with ERT  -*- lexical-binding:t -*-
+
 
 ;;; Commentary:
 
@@ -6,8 +7,6 @@
 
 ;;; Code:
 
-(require 'cl)  ;; for caddr
-(require 'dash)
 (require 'ert)
 
 (require 'buffer-ribbon)
