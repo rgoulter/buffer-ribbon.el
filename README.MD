@@ -18,7 +18,31 @@ of tiles.
 
 ## Visualisation / Screenshots
 
-WIP
+On my admittedly crammed laptop screen, the effect is:
+
+#### Scrolling
+
+![](screenshots/scroll-buffer-ribbon.gif)
+
+_A patch grid already filled with buffers._
+_The animation shows the patch grid 'scrolling' back_
+_and forth._
+
+#### "Zoom" Into Grid Tile
+
+![](screenshots/zoom-buffer-ribbon.gif)
+
+_A patch grid already filled with buffers._
+_The animation shows the patch grid 'zooming'_
+_into one of the grid tiles._
+
+#### Scrolling and then "Zoom" Into Grid Tile
+
+![](screenshots/scroll-and-zoom-buffer-ribbon.gif)
+
+_A patch grid already filled with buffers._
+_The animation shows using the patch grid to_
+_scroll and then zoom into one of the tiles._
 
 ## Command Overview
 
