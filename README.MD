@@ -9,7 +9,7 @@ Editor](https://www.youtube.com/watch?v=GwcxDZT3pXE).
 
 A _buffer ribbon_ is a strip of columns of buffers.
 
-A _patch grid_ is a 2x3 tiled grid of windows,
+A _patch grid_ is a 3x2 tiled grid of windows,
 which acts as a scrollable viewport of a buffer ribbon.
 
 It's similar to tiled desktops, with a continuous column
