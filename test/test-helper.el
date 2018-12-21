@@ -4,6 +4,9 @@
 
 ;;; Code:
 
+(when (require 'undercover nil t)
+  (undercover "*.el"))
+
 ;; My experience: Debian on WSL can't run make-frame in -batch,
 ;; (make-frame also doesn't work in MSYS2 shell, or CMD shell;
 ;;  although set-frame-size doesn't work in emacs -batch run from
