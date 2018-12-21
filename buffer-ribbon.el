@@ -1,5 +1,11 @@
 ;;; buffer-ribbon.el --- a buffer ribbon  -*- lexical-binding:t -*-
 
+;; Author: Richard Goulter <richard.goulter@gmail.com>
+;; URL: https://github.com/rgoulter/buffer-ribbon.el
+;; Keywords: convenience
+;; Version: 0.1-git
+;; Package-Requires: ((dash "2.13.0") (emacs "24.3"))
+
 ;;; Commentary:
 
 ;;; This file provides commands which are useful for
