@@ -1,6 +1,7 @@
 *buffer-ribbon.el*: Emacs support for buffer ribbons and patch grids.
 
 [![Build Status](https://travis-ci.com/rgoulter/buffer-ribbon.el.svg?branch=master)](https://travis-ci.com/rgoulter/buffer-ribbon.el)
+[![Coverage Status](https://coveralls.io/repos/github/rgoulter/buffer-ribbon.el/badge.svg?branch=master)](https://coveralls.io/github/rgoulter/buffer-ribbon.el?branch=master)
 
 As inspired by A. Henley's dissertation
 [Human Centric tools for Navigating Code](http://web.eecs.utk.edu/~azh/pubs/Henley2018bDissertation.pdf).  
