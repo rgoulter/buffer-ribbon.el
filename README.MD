@@ -80,34 +80,22 @@ e.g. using [abo-abo/hydra](https://github.com/abo-abo/hydra):
   ("b" switch-to-buffer "switch buffer")
 
   ("w"
-   (lambda ()
-     (interactive)
-     (buffer-ribbon/select-patch-grid-window 0 0))
+   (buffer-ribbon/select-patch-grid-window 0 0)
    "jump to grid tile 0, 0")
   ("e"
-   (lambda ()
-     (interactive)
-     (buffer-ribbon/select-patch-grid-window 1 0))
+   (buffer-ribbon/select-patch-grid-window 1 0)
    "jump to grid tile 1, 0")
   ("r"
-   (lambda ()
-     (interactive)
-     (buffer-ribbon/select-patch-grid-window 2 0))
+   (buffer-ribbon/select-patch-grid-window 2 0)
    "jump to grid tile 2, 0")
   ("s"
-   (lambda ()
-     (interactive)
-     (buffer-ribbon/select-patch-grid-window 0 1))
+   (buffer-ribbon/select-patch-grid-window 0 1)
    "jump to grid tile 0, 1")
   ("d"
-   (lambda ()
-     (interactive)
-     (buffer-ribbon/select-patch-grid-window 1 1))
+   (buffer-ribbon/select-patch-grid-window 1 1)
    "jump to grid tile 1, 1")
   ("f"
-   (lambda ()
-     (interactive)
-     (buffer-ribbon/select-patch-grid-window 2 1))
+   (buffer-ribbon/select-patch-grid-window 2 1)
    "jump to grid tile 2, 1"))
 ```
 
