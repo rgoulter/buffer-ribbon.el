@@ -166,6 +166,34 @@
           (should (equal old-patch-grid-buffers
                          actual-patch-grid-buffers)))))))
 
+(ert-deftest buffer-ribbon/test-e2e-from-existing-zoom-in-scroll ()
+  "Test that the patch-grid can zoom in, and that scrolling acts sensibly.
+
+Current behaviour is that 'scrolling' a patch grid which is
+zoomed in should have no effect."
+  ;; ASSEMBLE
+  ;;; make a frame
+  (buffer-ribbon/run-with-test-frame
+    (lambda (_test-frame)
+      ;;; split into 3x2
+      (buffer-ribbon/split-into-3-2)
+      ;;; set each of them to distinct buffers
+      (dotimes (i 6)
+        (set-window-buffer nil (get-buffer-create (int-to-string (+ 1 i))))
+        (other-window +1))
+      ;;; now init from existing grid
+      (buffer-ribbon/init-patch-grid-using-current-windows)
+      (let ((old-buffer-ribbon-buffers (buffer-ribbon/buffer-ribbon-buffers)))
+        ;; ACT
+        (buffer-ribbon/zoom-selected-window)
+        (buffer-ribbon/scroll-buffer-ribbon-left)
+        ;; ASSERT
+        ;;; check that the buffers are the same as we set them
+        (let ((actual-buffer-ribbon-buffers
+               (buffer-ribbon/buffer-ribbon-buffers)))
+          (should (equal old-buffer-ribbon-buffers
+                         actual-buffer-ribbon-buffers)))))))
+
 (provide 'buffer-ribbon-tests)
 
 ;;; buffer-ribbon-test.el ends here
