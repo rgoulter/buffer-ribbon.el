@@ -218,6 +218,8 @@ WINDOWS are updated with 'buffer-ribbon/set-patch-grid-window-parameters'."
     (-each-indexed windows
                    (lambda (index window)
                      (buffer-ribbon/set-patch-grid-window-parameters window index)))
+    ;; when the patch-grid is made, it won't be "zoomed in".
+    (set-frame-parameter nil 'buffer-ribbon-window-config nil)
     patch-grid))
 
 (defun buffer-ribbon/patch-grid-p (o)
@@ -587,8 +589,12 @@ To zoom back out to the window configuration when this command
 was called, call 'buffer-ribbon/unzoom'."
   (interactive)
   (buffer-ribbon/check-window-is-patch-grid-tile (selected-window)
-    (set-frame-parameter nil #'buffer-ribbon-window-config (current-window-configuration))
-    (delete-other-windows)))
+    (when (not (frame-parameter nil 'buffer-ribbon-window-config))
+      (set-frame-parameter
+       nil
+       'buffer-ribbon-window-config
+       (current-window-configuration))
+      (delete-other-windows))))
 
 ;;;###autoload
 (defun buffer-ribbon/unzoom ()
