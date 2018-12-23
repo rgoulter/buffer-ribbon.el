@@ -72,29 +72,37 @@ e.g. using [abo-abo/hydra](https://github.com/abo-abo/hydra):
 ```emacs-lisp
 (defhydra hydra-patch-grid (global-map "C-c r")
   "patch-grid"
-  ("h" buffer-ribbon/scroll-patch-grid-left "shift left")
-  ("l" buffer-ribbon/scroll-patch-grid-right "shift right")
-  ("j" buffer-ribbon/zoom-selected-window "zoom in" :exit t)
-  ("k" buffer-ribbon/unzoom "zoom out")
+  ("h" evil-window-left  "select left")
+  ("j" evil-window-down  "select down")
+  ("k" evil-window-up    "select up")
+  ("l" evil-window-right "select right")
+
+  ("H" buffer-ribbon/scroll-patch-grid-left "shift left")
+  ("L" buffer-ribbon/scroll-patch-grid-right "shift right")
+
+  ("J" buffer-ribbon/zoom-selected-window "zoom in" :exit t)
+  ("K" buffer-ribbon/unzoom "zoom out")
 
   ("b" switch-to-buffer "switch buffer")
 
-  ("w"
+  ("o" other-window "cycle to other-window")
+
+  ("gw"
    (buffer-ribbon/select-patch-grid-window 0 0)
    "jump to grid tile 0, 0")
-  ("e"
+  ("ge"
    (buffer-ribbon/select-patch-grid-window 1 0)
    "jump to grid tile 1, 0")
-  ("r"
+  ("gr"
    (buffer-ribbon/select-patch-grid-window 2 0)
    "jump to grid tile 2, 0")
-  ("s"
+  ("gs"
    (buffer-ribbon/select-patch-grid-window 0 1)
    "jump to grid tile 0, 1")
-  ("d"
+  ("gd"
    (buffer-ribbon/select-patch-grid-window 1 1)
    "jump to grid tile 1, 1")
-  ("f"
+  ("gf"
    (buffer-ribbon/select-patch-grid-window 2 1)
    "jump to grid tile 2, 1"))
 ```
