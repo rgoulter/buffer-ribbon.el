@@ -322,9 +322,9 @@ This is a convenience wrapper around 'buffer-ribbon/window-patch-grid'."
 KEY must be a string, and is used as the key prefix.
 NUMBER is appended to the KEY.
 
-For example, if KEY is 'my-key', then the results inserted into a hash
-table would be 'my-key', 'my-key<2>', 'my-key<3>', etc."
-  (let ((key-candidate (if number (format "%s<%d>" key number) key)))
+For example, if KEY is 'my-key, then the results inserted into a hash
+table would be 'my-key, 'my-key<2>, 'my-key<3>, etc."
+  (let ((key-candidate (intern (if number (format "%s<%d>" key number) key))))
     (if (not (gethash key-candidate hash))
         key-candidate
       (buffer-ribbon/next-unique-key
@@ -335,7 +335,7 @@ table would be 'my-key', 'my-key<2>', 'my-key<3>', etc."
 (defun buffer-ribbon/next-patch-grid-name ()
   "The next unique key-name for the global patch grid hash table.
 
-Typically, 'patch-grid', 'patch-grid<2>', 'patch-grid<3>', etc."
+Typically, 'patch-grid, 'patch-grid<2>, 'patch-grid<3>, etc."
   (buffer-ribbon/next-unique-key
    buffer-ribbon/global-patch-grid-hash
    "patch-grid"))
