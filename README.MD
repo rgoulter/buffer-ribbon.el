@@ -70,7 +70,7 @@ The commands are more useful bound to a keymap.
 e.g. using [abo-abo/hydra](https://github.com/abo-abo/hydra):
 
 ```emacs-lisp
-(defhydra hydra-patch-grid nil
+(defhydra hydra-patch-grid (global-map "C-c r")
   "patch-grid"
   ("h" buffer-ribbon/scroll-patch-grid-left "shift left")
   ("l" buffer-ribbon/scroll-patch-grid-right "shift right")
@@ -93,7 +93,7 @@ e.g. using [abo-abo/hydra](https://github.com/abo-abo/hydra):
    (lambda ()
      (interactive)
      (buffer-ribbon/select-patch-grid-window 2 0))
-   "jump to grid tile 1, 0")
+   "jump to grid tile 2, 0")
   ("s"
    (lambda ()
      (interactive)
@@ -109,11 +109,6 @@ e.g. using [abo-abo/hydra](https://github.com/abo-abo/hydra):
      (interactive)
      (buffer-ribbon/select-patch-grid-window 2 1))
    "jump to grid tile 2, 1"))
-
-(general-define-key
- :states '(normal visual)
- :prefix "SPC"
- "r" 'hydra-patch-grid/body)
 ```
 
 ## Interaction with Other Packages
