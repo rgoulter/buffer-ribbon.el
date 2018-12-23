@@ -20,22 +20,32 @@
 
 ;;;; window grid methods
 
-;; splitting vertically ('below) first, then horizontally
-;; means that other-window navigates "right" across
-;; the top, then "right" across the bottom.
-(defun buffer-ribbon/split-into-3-2-v-h ()
-  "Split the window into a 3x2 grid.
+(defun buffer-ribbon/split-window-mxn (window m n &optional w h)
+  "Split a WINDOW into M columns and N rows.
 
-This is done by first splitting vertically, then horizontally.
-This ordering means 'other-window' cycles across the top row
-then the bottom row."
-  (interactive)
-  (let ((bottom-window (split-window nil nil 'below)))
-    (split-window nil nil 'right)
-    (split-window nil nil 'right)
-    (split-window bottom-window nil 'right)
-    (split-window bottom-window nil 'right)
-    (balance-windows)))
+W and H are used as recursive arguments for the width
+and height of the split windows.
+
+This splits windows in such a way that 'other-window' cycles
+through top-to-bottom, left-to-right."
+  (let ((window (or window (selected-window)))
+        (w (or w (1+ (/ (window-width window) m))))
+        (h (or h (1+ (/ (window-height window) n)))))
+    (let ((remaining-columns
+           (if (> m 1)
+               ;; split columns
+               (let ((right-window (split-window window w 'right)))
+                 (buffer-ribbon/split-window-mxn right-window (1- m) n w h))
+             '()))
+          (column
+           (if (> n 1)
+               ;; split rows
+               (let ((bottom-window (split-window window h 'below)))
+                 (cons
+                  window
+                  (buffer-ribbon/split-window-mxn bottom-window 1 (1- n) w h)))
+             (list window))))
+      (append column remaining-columns))))
 
 ;; splitting horizontally ('right) first means that
 ;; other-window goes down, then returns to the top/right,
@@ -49,17 +59,9 @@ The selected window is used if WINDOW is nil.
 This splits the grid so that 'other-window' cycles through
 each column, left to right."
   (interactive)
-  (let* ((window (or window (selected-window)))
-         (mid-window (split-window window nil 'right))
-         (right-window (split-window mid-window nil 'right))
-         (windows (list window
-                        (split-window window nil 'below)
-                        mid-window
-                        (split-window mid-window nil 'below)
-                        right-window
-                        (split-window right-window nil 'below))))
-    (balance-windows)
-    windows))
+  (buffer-ribbon/split-window-mxn window 3 2))
+
+
 
 ;;;; buffer ribbon methods
 
