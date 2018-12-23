@@ -365,13 +365,17 @@ with the name generated for the patch grid."
   (* (buffer-ribbon/patch-grid-width)
      (buffer-ribbon/patch-grid-height)))
 
-(defun buffer-ribbon/patch-grid-window-live-ps (patch-grid)
-  "Return list of whether the patch grid windows are live.
+(defun buffer-ribbon/patch-grid-window-live-ps (&optional patch-grid)
+  "Return list of whether the PATCH-GRID windows are live.
 
 e.g. If all of the windows in a 3x2 patch grid are live, the result
 will be '(t t t t t t). If only the middle-top on is live, then the
-result will be '(nil nil t nil nil nil)."
-  (let ((windows (buffer-ribbon/patch-grid-windows patch-grid)))
+result will be '(nil nil t nil nil nil).
+
+If PATCH-GRID is nil, then 'buffer-ribbon/patch-grid-windows'
+is used."
+  (let* ((patch-grid (or patch-grid (buffer-ribbon/current-patch-grid)))
+         (windows (buffer-ribbon/patch-grid-windows patch-grid)))
     (mapcar #'window-live-p windows)))
 
 ;; this is useful because (window-list) returns
@@ -432,9 +436,13 @@ The buffers are sorted in the same order as
   (let ((wins (buffer-ribbon/list-of-windows-in-ribbon-order)))
     (mapcar #'window-buffer wins)))
 
-(defun buffer-ribbon/patch-grid-buffers (patch-grid)
-  "Get the buffers of the windows of the PATCH-GRID."
-  (let ((windows (buffer-ribbon/patch-grid-windows patch-grid)))
+(defun buffer-ribbon/patch-grid-buffers (&optional patch-grid)
+  "Get the buffers of the windows of the PATCH-GRID.
+
+If PATCH-GRID is nil then 'buffer-ribbon/current-patch-grid'
+is used."
+  (let* ((patch-grid (or patch-grid (buffer-ribbon/current-patch-grid)))
+         (windows (buffer-ribbon/patch-grid-windows patch-grid)))
     (mapcar #'window-buffer windows)))
 
 (defun buffer-ribbon/update-buffer-ribbon-from-patch-grid (buffer-ribbon patch-grid)
