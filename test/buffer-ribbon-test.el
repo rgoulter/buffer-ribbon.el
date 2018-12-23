@@ -137,6 +137,35 @@
           (should (equal old-patch-grid-buffers
                          actual-patch-grid-buffers)))))))
 
+(ert-deftest buffer-ribbon/test-e2e-from-existing-zoom-in-zoom-in-unzoom ()
+  "Test that the patch-grid can zoom in (twice) and unzoom correctly."
+  ;; ASSEMBLE
+  ;;; make a frame
+  (buffer-ribbon/run-with-test-frame
+    (lambda (_test-frame)
+      ;;; split into 3x2
+      (buffer-ribbon/split-into-3-2)
+      ;;; set each of them to distinct buffers
+      (dotimes (i 6)
+        (set-window-buffer nil (get-buffer-create (int-to-string (+ 1 i))))
+        (other-window +1))
+      ;;; now init from existing grid
+      (buffer-ribbon/init-patch-grid-using-current-windows)
+      (let ((old-patch-grid-buffers (buffer-ribbon/patch-grid-buffers)))
+        ;; ACT
+        ;;; zoom in
+        (buffer-ribbon/zoom-selected-window)
+        (buffer-ribbon/zoom-selected-window)
+        (buffer-ribbon/unzoom)
+        ;; ASSERT
+        ;;; check that the buffers are the same as we set them
+        (let ((window-live-ps (buffer-ribbon/patch-grid-window-live-ps))
+              (actual-patch-grid-buffers (buffer-ribbon/patch-grid-buffers)))
+          (should (equal '(t t t t t t)
+                         window-live-ps))
+          (should (equal old-patch-grid-buffers
+                         actual-patch-grid-buffers)))))))
+
 (provide 'buffer-ribbon-tests)
 
 ;;; buffer-ribbon-test.el ends here
