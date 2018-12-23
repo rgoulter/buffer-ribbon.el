@@ -81,11 +81,14 @@ COLUMN-HEIGHT (option) defaults to 2."
        (listp (cadr o))
        (integerp (caddr o))))
 
-(defun buffer-ribbon/buffer-ribbon-buffers (ribbon)
+(defun buffer-ribbon/buffer-ribbon-buffers (&optional ribbon)
   "Get the buffers of the buffer-ribbon RIBBON."
-  (if (buffer-ribbon/buffer-ribbon-p ribbon)
-      (cadr ribbon)
-    (signal 'wrong-type-argument (list #'buffer-ribbon/buffer-ribbon-p ribbon))))
+  (let ((ribbon (buffer-ribbon/current-buffer-ribbon)))
+    (if (buffer-ribbon/buffer-ribbon-p ribbon)
+        (cadr ribbon)
+      (signal
+       'wrong-type-argument
+       (list #'buffer-ribbon/buffer-ribbon-p ribbon)))))
 
 (defun buffer-ribbon/set-buffer-ribbon-buffers (ribbon new-buffers)
   "Set the buffer-ribbon RIBBON to have buffers NEW-BUFFERS."
@@ -93,13 +96,17 @@ COLUMN-HEIGHT (option) defaults to 2."
       (setcdr ribbon
               (cons new-buffers
                     (list (caddr ribbon))))
-    (signal 'wrong-type-argument (list #'buffer-ribbon/buffer-ribbon-p ribbon))))
+    (signal
+     'wrong-type-argument
+     (list #'buffer-ribbon/buffer-ribbon-p ribbon))))
 
 (defun buffer-ribbon/buffer-ribbon-height (ribbon)
   "The column height of the buffer-ribbon RIBBON."
   (if (buffer-ribbon/buffer-ribbon-p ribbon)
       (caddr ribbon)
-    (signal 'wrong-type-argument (list #'buffer-ribbon/buffer-ribbon-p ribbon))))
+    (signal
+     'wrong-type-argument
+     (list #'buffer-ribbon/buffer-ribbon-p ribbon))))
 
 (defun buffer-ribbon/current-buffer-ribbon ()
   "The 'current' buffer-ribbon.
@@ -234,7 +241,9 @@ WINDOWS are updated with 'buffer-ribbon/set-patch-grid-window-parameters'."
   "Get the buffer-ribbon of PATCH-GRID to NEW-BUFFER-RIBBON."
   (if (buffer-ribbon/patch-grid-p patch-grid)
       (cadr patch-grid)
-    (signal 'wrong-type-argument (list #'buffer-ribbon/patch-grid-p patch-grid))))
+    (signal
+     'wrong-type-argument
+     (list #'buffer-ribbon/patch-grid-p patch-grid))))
 
 (defun buffer-ribbon/set-patch-buffer-ribbon (patch-grid new-buffer-ribbon)
   "Set the buffer-ribbon of PATCH-GRID to NEW-BUFFER-RIBBON.
@@ -245,7 +254,9 @@ Note: the windows of the PATCH-GRID are not updated."
               (cons new-buffer-ribbon
                     (list (caddr patch-grid)
                           (cadddr patch-grid))))
-    (signal 'wrong-type-argument (list #'buffer-ribbon/patch-grid-p patch-grid))))
+    (signal
+     'wrong-type-argument
+     (list #'buffer-ribbon/patch-grid-p patch-grid))))
 
 (defun buffer-ribbon/patch-grid-column (patch-grid)
   "Get the column of PATCH-GRID.
@@ -253,7 +264,9 @@ Note: the windows of the PATCH-GRID are not updated."
 This is the scroll-position against the buffer-ribbon."
   (if (buffer-ribbon/patch-grid-p patch-grid)
       (caddr patch-grid)
-    (signal 'wrong-type-argument (list #'buffer-ribbon/patch-grid-p patch-grid))))
+    (signal
+     'wrong-type-argument
+     (list #'buffer-ribbon/patch-grid-p patch-grid))))
 
 (defun buffer-ribbon/set-patch-grid-column (patch-grid new-column)
   "Set the column of PATCH-GRID to NEW-COLUMN.
@@ -264,13 +277,17 @@ This is the scroll-position against the buffer-ribbon."
               (cons (cadr patch-grid)
                     (list new-column
                           (cadddr patch-grid))))
-    (signal 'wrong-type-argument (list #'buffer-ribbon/patch-grid-p patch-grid))))
+    (signal
+     'wrong-type-argument
+     (list #'buffer-ribbon/patch-grid-p patch-grid))))
 
 (defun buffer-ribbon/patch-grid-windows (patch-grid)
   "Get the windows of the PATCH-GRID."
   (if (buffer-ribbon/patch-grid-p patch-grid)
       (cadddr patch-grid)
-    (signal 'wrong-type-argument (list #'buffer-ribbon/patch-grid-p patch-grid))))
+    (signal
+     'wrong-type-argument
+     (list #'buffer-ribbon/patch-grid-p patch-grid))))
 
 (defun buffer-ribbon/set-patch-grid-windows (patch-grid new-windows)
   "Set the windows of the PATCH-GRID to NEW-WINDOWS.
@@ -281,7 +298,9 @@ Note: the windows are not updated."
               (cons (cadr patch-grid)
                     (caddr patch-grid)
                     (list new-windows)))
-    (signal 'wrong-type-argument (list #'buffer-ribbon/patch-grid-p patch-grid))))
+    (signal
+     'wrong-type-argument
+     (list #'buffer-ribbon/patch-grid-p patch-grid))))
 
 (defun buffer-ribbon/patch-grid (name)
   "Get the patch-grid with the given NAME.
