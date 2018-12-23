@@ -365,6 +365,15 @@ with the name generated for the patch grid."
   (* (buffer-ribbon/patch-grid-width)
      (buffer-ribbon/patch-grid-height)))
 
+(defun buffer-ribbon/patch-grid-window-live-ps (patch-grid)
+  "Return list of whether the patch grid windows are live.
+
+e.g. If all of the windows in a 3x2 patch grid are live, the result
+will be '(t t t t t t). If only the middle-top on is live, then the
+result will be '(nil nil t nil nil nil)."
+  (let ((windows (buffer-ribbon/patch-grid-windows patch-grid)))
+    (mapcar #'window-live-p windows)))
+
 ;; this is useful because (window-list) returns
 ;; in an order I might not like
 ;;

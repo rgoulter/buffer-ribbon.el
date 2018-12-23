@@ -27,9 +27,8 @@
         (other-window +1))
       ;;; now init from existing grid
       (buffer-ribbon/init-patch-grid-using-current-windows)
-      (let ((old-patch-grid-buffers
-             (mapcar 'window-buffer
-                     (buffer-ribbon/patch-grid-windows (buffer-ribbon/current-patch-grid)))))
+      (let ((old-patch-grid-buffers (buffer-ribbon/patch-grid-buffers
+                                     (buffer-ribbon/current-patch-grid))))
         ;; ACT
         ;;; shift to the right
         (buffer-ribbon/scroll-buffer-ribbon-right)
@@ -44,8 +43,8 @@
         (buffer-ribbon/scroll-buffer-ribbon-left)
         ;; ASSERT
         ;;; check that the buffers are the same as we set them
-        (let ((actual-patch-grid-buffers (mapcar 'window-buffer
-                     (buffer-ribbon/patch-grid-windows (buffer-ribbon/current-patch-grid)))))
+        (let ((actual-patch-grid-buffers (buffer-ribbon/patch-grid-buffers
+                                          (buffer-ribbon/current-patch-grid))))
         (should (equal old-patch-grid-buffers
                        actual-patch-grid-buffers)))))))
 
@@ -63,9 +62,8 @@
         (other-window +1))
       ;;; now init from existing grid
       (buffer-ribbon/init-patch-grid-using-current-windows)
-      (let ((old-patch-grid-buffers
-             (mapcar 'window-buffer
-                     (buffer-ribbon/patch-grid-windows (buffer-ribbon/current-patch-grid)))))
+      (let ((old-patch-grid-buffers (buffer-ribbon/patch-grid-buffers
+                                     (buffer-ribbon/current-patch-grid))))
         ;; ACT
         ;;; shift to the left
         (buffer-ribbon/scroll-buffer-ribbon-left)
@@ -81,8 +79,70 @@
         (buffer-ribbon/scroll-buffer-ribbon-right)
         ;; ASSERT
         ;;; check that the buffers are the same as we set them
-        (let ((actual-patch-grid-buffers (mapcar 'window-buffer
-                     (buffer-ribbon/patch-grid-windows (buffer-ribbon/current-patch-grid)))))
+        (let ((actual-patch-grid-buffers (buffer-ribbon/patch-grid-buffers
+                                          (buffer-ribbon/current-patch-grid))))
+        (should (equal old-patch-grid-buffers
+                       actual-patch-grid-buffers)))))))
+
+;;; zoom in
+(ert-deftest buffer-ribbon/test-e2e-from-existing-zoom-in ()
+  "Test that the patch-grid can zoom in correctly."
+  ;; ASSEMBLE
+  ;;; make a frame
+  (buffer-ribbon/run-with-test-frame
+    (lambda (_test-frame)
+      ;;; split into 3x2
+      (buffer-ribbon/split-into-3-2)
+      ;;; set each of them to distinct buffers
+      (dotimes (i 6)
+        (set-window-buffer nil (get-buffer-create (int-to-string (+ 1 i))))
+        (other-window +1))
+      ;;; now init from existing grid
+      (buffer-ribbon/init-patch-grid-using-current-windows)
+      (let ((old-patch-grid-buffers (buffer-ribbon/patch-grid-buffers
+                                     (buffer-ribbon/current-patch-grid))))
+        ;; ACT
+        ;;; zoom in
+        (buffer-ribbon/zoom-selected-window)
+        ;; ASSERT
+        ;;; check that the buffers are the same as we set them
+        (let ((window-live-ps (buffer-ribbon/patch-grid-window-live-ps
+                               (buffer-ribbon/current-patch-grid)))
+              (selected-buffer (window-buffer)))
+        (should (equal '(t nil nil nil nil nil)
+                       window-live-ps))
+        (should (equal (car old-patch-grid-buffers)
+                       selected-buffer)))))))
+
+;;; zoom in, unzoom
+(ert-deftest buffer-ribbon/test-e2e-from-existing-zoom-in-unzoom ()
+  "Test that the patch-grid can zoom in and unzoom correctly."
+  ;; ASSEMBLE
+  ;;; make a frame
+  (buffer-ribbon/run-with-test-frame
+    (lambda (_test-frame)
+      ;;; split into 3x2
+      (buffer-ribbon/split-into-3-2)
+      ;;; set each of them to distinct buffers
+      (dotimes (i 6)
+        (set-window-buffer nil (get-buffer-create (int-to-string (+ 1 i))))
+        (other-window +1))
+      ;;; now init from existing grid
+      (buffer-ribbon/init-patch-grid-using-current-windows)
+      (let ((old-patch-grid-buffers (buffer-ribbon/patch-grid-buffers
+                                     (buffer-ribbon/current-patch-grid))))
+        ;; ACT
+        ;;; zoom in
+        (buffer-ribbon/zoom-selected-window)
+        (buffer-ribbon/unzoom)
+        ;; ASSERT
+        ;;; check that the buffers are the same as we set them
+        (let ((window-live-ps (buffer-ribbon/patch-grid-window-live-ps
+                               (buffer-ribbon/current-patch-grid)))
+              (actual-patch-grid-buffers (buffer-ribbon/patch-grid-buffers
+                                          (buffer-ribbon/current-patch-grid))))
+        (should (equal '(t t t t t t)
+                       window-live-ps))
         (should (equal old-patch-grid-buffers
                        actual-patch-grid-buffers)))))))
 
