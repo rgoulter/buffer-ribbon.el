@@ -1,4 +1,4 @@
-;;; buffer-ribbon-tests.el --- Tests buffer-ribbon with ERT  -*- lexical-binding:t -*-
+;;; buffer-ribbon-test.el --- Tests buffer-ribbon with ERT  -*- lexical-binding:t -*-
 
 ;;; Commentary:
 
@@ -43,8 +43,8 @@
         ;; ASSERT
         ;;; check that the buffers are the same as we set them
         (let ((actual-patch-grid-buffers (buffer-ribbon/patch-grid-buffers)))
-        (should (equal old-patch-grid-buffers
-                       actual-patch-grid-buffers)))))))
+          (should (equal old-patch-grid-buffers
+                         actual-patch-grid-buffers)))))))
 
 (ert-deftest buffer-ribbon/test-e2e-from-existing-scroll-left-scroll-right ()
   "Test that the patch-grid can scroll right then scroll left correctly."
@@ -77,8 +77,8 @@
         ;; ASSERT
         ;;; check that the buffers are the same as we set them
         (let ((actual-patch-grid-buffers (buffer-ribbon/patch-grid-buffers)))
-        (should (equal old-patch-grid-buffers
-                       actual-patch-grid-buffers)))))))
+          (should (equal old-patch-grid-buffers
+                         actual-patch-grid-buffers)))))))
 
 ;;; zoom in
 (ert-deftest buffer-ribbon/test-e2e-from-existing-zoom-in ()
@@ -103,10 +103,10 @@
         ;;; check that the buffers are the same as we set them
         (let ((window-live-ps (buffer-ribbon/patch-grid-window-live-ps))
               (selected-buffer (window-buffer)))
-        (should (equal '(t nil nil nil nil nil)
-                       window-live-ps))
-        (should (equal (car old-patch-grid-buffers)
-                       selected-buffer)))))))
+          (should (equal '(t nil nil nil nil nil)
+                         window-live-ps))
+          (should (equal (car old-patch-grid-buffers)
+                         selected-buffer)))))))
 
 ;;; zoom in, unzoom
 (ert-deftest buffer-ribbon/test-e2e-from-existing-zoom-in-unzoom ()
@@ -132,11 +132,11 @@
         ;;; check that the buffers are the same as we set them
         (let ((window-live-ps (buffer-ribbon/patch-grid-window-live-ps))
               (actual-patch-grid-buffers (buffer-ribbon/patch-grid-buffers)))
-        (should (equal '(t t t t t t)
-                       window-live-ps))
-        (should (equal old-patch-grid-buffers
-                       actual-patch-grid-buffers)))))))
+          (should (equal '(t t t t t t)
+                         window-live-ps))
+          (should (equal old-patch-grid-buffers
+                         actual-patch-grid-buffers)))))))
 
 (provide 'buffer-ribbon-tests)
 
-;;; buffer-ribbon-tests.el ends here
+;;; buffer-ribbon-test.el ends here
