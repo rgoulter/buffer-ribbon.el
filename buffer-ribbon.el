@@ -489,23 +489,28 @@ If PATCH-GRID is nil, then 'buffer-ribbon/current-patch-grid' is used."
 A positive COLUMN-DELTA moves the PATCH-GRID to the right by
 that number of columns.
 A negative COLUMN-DELTA moves the PATCH-GRID to the left by
-that number of columns."
-  (buffer-ribbon/update-buffer-ribbon-from-patch-grid patch-grid)
-  (let* ((old-column (buffer-ribbon/patch-grid-column patch-grid))
-         (buffer-ribbon (buffer-ribbon/patch-grid-buffer-ribbon patch-grid))
-         (ribbon-width (buffer-ribbon/buffer-ribbon-width buffer-ribbon))
-         (new-column (+ old-column column-delta))
-         (grid-width (buffer-ribbon/patch-grid-width patch-grid))
-         (num-columns-to-prepend (- 0 new-column))
-         (num-columns-to-append (- (+ new-column grid-width) ribbon-width)))
-    (dotimes (_ num-columns-to-prepend)
-      (buffer-ribbon/buffer-ribbon-prepend-column buffer-ribbon)
-      (buffer-ribbon/set-patch-grid-column patch-grid (+ 1 old-column)))
-    (dotimes (_ num-columns-to-append)
-      (buffer-ribbon/buffer-ribbon-append-column buffer-ribbon)))
-  (let* ((old-column (buffer-ribbon/patch-grid-column patch-grid)))
-    (buffer-ribbon/set-patch-grid-column patch-grid (+ old-column column-delta)))
-  (buffer-ribbon/push-buffer-ribbon-to-patch-grid patch-grid))
+that number of columns.
+
+Assumes that PATCH-GRID is within the current frame."
+  ;; N.B. using 'frame-parameter nil' assumes patch-grid belongs to
+  ;; the selected frame.
+  (when (not (frame-parameter nil 'buffer-ribbon-window-config))
+    (buffer-ribbon/update-buffer-ribbon-from-patch-grid patch-grid)
+    (let* ((old-column (buffer-ribbon/patch-grid-column patch-grid))
+           (buffer-ribbon (buffer-ribbon/patch-grid-buffer-ribbon patch-grid))
+           (ribbon-width (buffer-ribbon/buffer-ribbon-width buffer-ribbon))
+           (new-column (+ old-column column-delta))
+           (grid-width (buffer-ribbon/patch-grid-width patch-grid))
+           (num-columns-to-prepend (- 0 new-column))
+           (num-columns-to-append (- (+ new-column grid-width) ribbon-width)))
+      (dotimes (_ num-columns-to-prepend)
+        (buffer-ribbon/buffer-ribbon-prepend-column buffer-ribbon)
+        (buffer-ribbon/set-patch-grid-column patch-grid (+ 1 old-column)))
+      (dotimes (_ num-columns-to-append)
+        (buffer-ribbon/buffer-ribbon-append-column buffer-ribbon)))
+    (let* ((old-column (buffer-ribbon/patch-grid-column patch-grid)))
+      (buffer-ribbon/set-patch-grid-column patch-grid (+ old-column column-delta)))
+    (buffer-ribbon/push-buffer-ribbon-to-patch-grid patch-grid)))
 
 ;;;; user-facing commands
 
