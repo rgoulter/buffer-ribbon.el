@@ -4,7 +4,7 @@
 ;; URL: https://github.com/rgoulter/buffer-ribbon.el
 ;; Keywords: convenience
 ;; Version: 0.1-git
-;; Package-Requires: ((dash "2.13.0") (emacs "24.3"))
+;; Package-Requires: ((dash "2.13.0") (emacs "24.4"))
 
 ;;; Commentary:
 
@@ -569,7 +569,7 @@ will come into view."
 ;;;###autoload
 (defalias
   #'buffer-ribbon/scroll-patch-grid-right
-  #'buffer-ribbon/scroll-buffer-ribbon-right
+  #'buffer-ribbon/scroll-buffer-ribbon-left
   "Move the patch grid right along the ribbon.
 
 Buffers which were to the right of the patch grid view
