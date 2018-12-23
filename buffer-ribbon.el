@@ -362,8 +362,8 @@ with the name generated for the patch grid."
 
 (defun buffer-ribbon/patch-grid-count (&optional patch-grid)
   "Number of tiles the PATCH-GRID has."
-  (* (buffer-ribbon/patch-grid-width)
-     (buffer-ribbon/patch-grid-height)))
+  (* (buffer-ribbon/patch-grid-width patch-grid)
+     (buffer-ribbon/patch-grid-height patch-grid)))
 
 (defun buffer-ribbon/patch-grid-window-live-ps (&optional patch-grid)
   "Return list of whether the PATCH-GRID windows are live.
