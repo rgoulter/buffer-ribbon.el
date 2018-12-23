@@ -567,16 +567,13 @@ will come into view."
      +1)))
 
 ;;;###autoload
-(defun buffer-ribbon/scroll-patch-grid-right ()
+(defalias
+  #'buffer-ribbon/scroll-patch-grid-right
+  #'buffer-ribbon/scroll-buffer-ribbon-right
   "Move the patch grid right along the ribbon.
 
 Buffers which were to the right of the patch grid view
-will come into view."
-  (interactive)
-  (buffer-ribbon/check-window-is-patch-grid-tile (selected-window)
-    (buffer-ribbon/scroll-patch-grid-on-buffer-ribbon
-     (buffer-ribbon/current-patch-grid)
-     +1)))
+will come into view.")
 
 ;;;###autoload
 (defun buffer-ribbon/scroll-buffer-ribbon-right ()
@@ -591,16 +588,13 @@ will come into view."
      -1)))
 
 ;;;###autoload
-(defun buffer-ribbon/scroll-patch-grid-left ()
+(defalias
+  #'buffer-ribbon/scroll-patch-grid-left
+  #'buffer-ribbon/scroll-buffer-ribbon-right
   "Move the patch grid left along the buffer ribbon.
 
 Buffers which were to the left of the patch grid view
-will come into view."
-  (interactive)
-  (buffer-ribbon/check-window-is-patch-grid-tile (selected-window)
-    (buffer-ribbon/scroll-patch-grid-on-buffer-ribbon
-     (buffer-ribbon/current-patch-grid)
-     -1)))
+will come into view.")
 
 ;;;###autoload
 (defun buffer-ribbon/zoom-selected-window ()
