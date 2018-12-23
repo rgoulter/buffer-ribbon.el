@@ -411,12 +411,13 @@ grid wasn't)."
          (buffers (buffer-ribbon/buffer-ribbon-buffers buffer-ribbon)))
     (-slice buffers start-offset end-offset)))
 
-(defun buffer-ribbon/push-buffer-ribbon-to-patch-grid (buffer-ribbon patch-grid)
-  "Set the buffers in windows of PATCH-GRID from the view of BUFFER-RIBBON.
+(defun buffer-ribbon/push-buffer-ribbon-to-patch-grid (patch-grid)
+  "Set the buffers in windows of PATCH-GRID from the view of its buffer-ribbon.
 
-The buffers from BUFFER-RIBBON are taken acording to
+The buffers from buffer-ribbon are taken acording to
 'buffer-ribbon/buffers-for-patch-grid'."
-  (let* ((new-buffers (buffer-ribbon/buffer-ribbon-buffers-for-patch-grid
+  (let* ((buffer-ribbon (buffer-ribbon/patch-grid-buffer-ribbon patch-grid))
+         (new-buffers (buffer-ribbon/buffer-ribbon-buffers-for-patch-grid
                        buffer-ribbon
                        patch-grid))
          (windows (buffer-ribbon/patch-grid-windows patch-grid))
@@ -445,27 +446,32 @@ is used."
          (windows (buffer-ribbon/patch-grid-windows patch-grid)))
     (mapcar #'window-buffer windows)))
 
-(defun buffer-ribbon/update-buffer-ribbon-from-patch-grid (buffer-ribbon patch-grid)
-  "Update the BUFFER-RIBBON with the current buffers in PATCH-GRID.
+(defun buffer-ribbon/update-buffer-ribbon-from-patch-grid (&optional patch-grid)
+  "Update the PATCH-GRID's buffer-ribbon with the current buffers in PATCH-GRID.
 
 Replace the part of the buffer-ribbon which is visible on
-the patch-grid with the buffers in the patch-grid."
-  (let* ((buffers (buffer-ribbon/patch-grid-buffers patch-grid))
+the patch-grid with the buffers in the patch-grid.
+
+If PATCH-GRID is nil, then 'buffer-ribbon/current-patch-grid' is used."
+  (let* ((patch-grid (or patch-grid (buffer-ribbon/current-patch-grid)))
+         (buffers (buffer-ribbon/patch-grid-buffers patch-grid))
          (column (buffer-ribbon/patch-grid-column patch-grid))
+         (buffer-ribbon (buffer-ribbon/patch-grid-buffer-ribbon patch-grid))
          (offset (buffer-ribbon/column-to-offset buffer-ribbon column))
          (old-buffers (buffer-ribbon/buffer-ribbon-buffers buffer-ribbon))
          (new-buffers (buffer-ribbon/list-replace-at-offset old-buffers offset buffers)))
     (buffer-ribbon/set-buffer-ribbon-buffers buffer-ribbon new-buffers)))
 
-(defun buffer-ribbon/scroll-patch-grid-on-buffer-ribbon (buffer-ribbon patch-grid column-delta)
+(defun buffer-ribbon/scroll-patch-grid-on-buffer-ribbon (patch-grid column-delta)
   "Scroll the BUFFER-RIBBON in PATCH-GRID by COLUMN-DELTA.
 
 A positive COLUMN-DELTA moves the PATCH-GRID to the right by
 that number of columns.
 A negative COLUMN-DELTA moves the PATCH-GRID to the left by
 that number of columns."
-  (buffer-ribbon/update-buffer-ribbon-from-patch-grid buffer-ribbon patch-grid)
+  (buffer-ribbon/update-buffer-ribbon-from-patch-grid patch-grid)
   (let* ((old-column (buffer-ribbon/patch-grid-column patch-grid))
+         (buffer-ribbon (buffer-ribbon/patch-grid-buffer-ribbon patch-grid))
          (ribbon-width (buffer-ribbon/buffer-ribbon-width buffer-ribbon))
          (new-column (+ old-column column-delta))
          (grid-width (buffer-ribbon/patch-grid-width patch-grid))
@@ -478,7 +484,7 @@ that number of columns."
       (buffer-ribbon/buffer-ribbon-append-column buffer-ribbon)))
   (let* ((old-column (buffer-ribbon/patch-grid-column patch-grid)))
     (buffer-ribbon/set-patch-grid-column patch-grid (+ old-column column-delta)))
-  (buffer-ribbon/push-buffer-ribbon-to-patch-grid buffer-ribbon patch-grid))
+  (buffer-ribbon/push-buffer-ribbon-to-patch-grid patch-grid))
 
 ;;;; user-facing commands
 
@@ -495,7 +501,7 @@ WINDOW defaults to 'selected-window' if nil."
                       buffer-ribbon
                       grid-windows)))
     (buffer-ribbon/register-patch-grid patch-grid)
-    (buffer-ribbon/update-buffer-ribbon-from-patch-grid buffer-ribbon patch-grid)))
+    (buffer-ribbon/update-buffer-ribbon-from-patch-grid)))
 
 ;;;###autoload
 (defun buffer-ribbon/init-patch-grid-using-new-frame ()
@@ -520,7 +526,7 @@ frame will be considered for the patch-grid."
                       buffer-ribbon
                       current-windows)))
     (buffer-ribbon/register-patch-grid patch-grid)
-    (buffer-ribbon/update-buffer-ribbon-from-patch-grid buffer-ribbon patch-grid)))
+    (buffer-ribbon/update-buffer-ribbon-from-patch-grid)))
 
 ;;;###autoload
 (defun buffer-ribbon/scroll-buffer-ribbon-left ()
@@ -531,7 +537,6 @@ will come into view."
   (interactive)
   (buffer-ribbon/check-window-is-patch-grid-tile (selected-window)
     (buffer-ribbon/scroll-patch-grid-on-buffer-ribbon
-     (buffer-ribbon/current-buffer-ribbon)
      (buffer-ribbon/current-patch-grid)
      +1)))
 
@@ -544,7 +549,6 @@ will come into view."
   (interactive)
   (buffer-ribbon/check-window-is-patch-grid-tile (selected-window)
     (buffer-ribbon/scroll-patch-grid-on-buffer-ribbon
-     (buffer-ribbon/current-buffer-ribbon)
      (buffer-ribbon/current-patch-grid)
      +1)))
 
@@ -557,7 +561,6 @@ will come into view."
   (interactive)
   (buffer-ribbon/check-window-is-patch-grid-tile (selected-window)
     (buffer-ribbon/scroll-patch-grid-on-buffer-ribbon
-     (buffer-ribbon/current-buffer-ribbon)
      (buffer-ribbon/current-patch-grid)
      -1)))
 
@@ -570,7 +573,6 @@ will come into view."
   (interactive)
   (buffer-ribbon/check-window-is-patch-grid-tile (selected-window)
     (buffer-ribbon/scroll-patch-grid-on-buffer-ribbon
-     (buffer-ribbon/current-buffer-ribbon)
      (buffer-ribbon/current-patch-grid)
      -1)))
 
